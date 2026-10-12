@@ -220,14 +220,15 @@ In a live panel evaluation, the system demonstrates:
 
 ## 11. Git workflow
 
-1. `main` always works and is demo-ready. Nobody pushes to it directly.
-2. Create a branch per task: `type/area-short-description` (for example `feat/compression-quantization`, `feat/sensor-ble-pairing`, `fix/comparison-panel-crash`).
-3. Commit small and often with clear messages.
-4. Open a pull request into `main`; at least one other member reviews it.
-5. Pull from `main` before starting new work.
-6. Edit files in your own folders. For changes in someone else's area, ask them or open a PR for their review.
+1. **`main`:** Production/demo-ready branch. Used for supervisor reviews and milestone evaluations. Nobody pushes to `main` directly.
+2. **`develop`:** Primary integration branch. All ongoing feature branches are merged here first.
+3. **Feature branches:** Create a branch per task off `develop`: `type/area-short-description` (e.g., `feat/compression-quantization`, `feat/sensor-ble-pairing`, `fix/comparison-panel-crash`).
+4. **Pull requests:** Open PRs targeting the `develop` branch. At least one teammate reviews and approves before merging.
+5. **Releases to `main`:** Before milestone reviews, ensure all tests pass on `develop`, then merge `develop` into `main` with a release tag (e.g., `v1.0-milestone`).
+6. **Sync often:** Regularly pull updates from `develop` into your feature branch to avoid merge conflicts.
+7. **Code ownership:** Work within your assigned subsystem folders. For changes in another member's area, consult them or open a PR for review.
 
-**Large files:** do not commit datasets. Use Git LFS or GitHub Releases for large model files. Never commit passwords, API keys, or personal images.
+**Large files:** Do not commit datasets or heavy model weights. Use Git LFS or external releases for large files. Never commit secrets, passwords, or personal test photos.
 
 ## 12. Ethics
 
