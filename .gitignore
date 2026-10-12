@@ -1,0 +1,84 @@
+# Ignore Codacy VS Code AI rules
+.github/instructions/codacy.instructions.md
+.codacy/
+
+# Operating System & IDE
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+
+# Python & Machine Learning
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+*.manifest
+*.spec
+
+# Model Weights & Checkpoints (Use Git LFS or storage buckets for large weights)
+checkpoints/
+*.ckpt
+*.pth
+*.pt
+*.h5
+*.keras
+*.onnx
+
+# Research Datasets (Never commit raw dataset images/labels)
+data/*
+!data/README.md
+!data/*.py
+!data/*.sh
+
+# Flutter / Dart (Mobile App)
+app/.dart_tool/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/.packages
+app/.pub-cache/
+app/.pub/
+app/build/
+app/android/.gradle/
+app/android/local.properties
+app/ios/Pods/
+app/ios/.symlinks/
+
+# Node.js / Next.js (Dashboard)
+dashboard/node_modules/
+dashboard/.next/
+dashboard/out/
+dashboard/npm-debug.log*
+dashboard/yarn-debug.log*
+dashboard/yarn-error.log*
+
+# Logs & Benchmarks temporary outputs
+*.log
