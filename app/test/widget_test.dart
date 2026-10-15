@@ -1,30 +1,38 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fairscope_app/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Task 1: Navigation shell switches tabs and shows owner labels', (WidgetTester tester) async {
+    // Build our app wrapped in ProviderScope
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: FairScopeApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Tab 1: Scan tab is visible initially with Member A's label
+    expect(find.text('FairScope Scan'), findsOneWidget);
+    expect(find.textContaining('Member A'), findsWidgets);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Switch to Tab 2: Sensor
+    await tester.tap(find.byIcon(Icons.sensors_outlined));
+    await tester.pumpAndSettle();
+    expect(find.text('IoT Sensor Probe'), findsOneWidget);
+    expect(find.textContaining('Member B'), findsWidgets);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Switch to Tab 3: Compare (Member C)
+    await tester.tap(find.byIcon(Icons.bar_chart_outlined));
+    await tester.pumpAndSettle();
+    expect(find.text('Model Comparison'), findsOneWidget);
+    expect(find.textContaining('Member C (Monal)'), findsWidgets);
+
+    // Switch to Tab 4: Explain (Member D)
+    await tester.tap(find.byIcon(Icons.lightbulb_outline_rounded));
+    await tester.pumpAndSettle();
+    expect(find.text('Explainability & Fairness'), findsOneWidget);
+    expect(find.textContaining('Member D'), findsWidgets);
   });
 }
