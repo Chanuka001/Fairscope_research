@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fairscope_app/main.dart';
 
 void main() {
-  testWidgets('Task 2: First launch shows onboarding, consent unlocks NavShell', (WidgetTester tester) async {
+  testWidgets('Task 4: Sensor tab displays live simulated telemetry and probe status', (WidgetTester tester) async {
     // 1. Build app wrapped in ProviderScope
     await tester.pumpWidget(
       const ProviderScope(
@@ -13,33 +13,37 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // 2. Onboarding is displayed initially
-    expect(find.text('Your data and privacy'), findsOneWidget);
-    expect(find.text('Data is used for research only.'), findsOneWidget);
-    expect(find.text('I understand and agree'), findsOneWidget);
-
-    final continueFinder = find.widgetWithText(ElevatedButton, 'Continue');
-    expect(continueFinder, findsOneWidget);
-
-    // 3. Scroll if needed and tap consent checkbox
+    // 2. Agree to onboarding consent
     final checkboxFinder = find.text('I understand and agree');
     await tester.ensureVisible(checkboxFinder);
     await tester.tap(checkboxFinder);
     await tester.pumpAndSettle();
 
-    // 4. Ensure Continue is visible in scroll view, then tap
+    final continueFinder = find.widgetWithText(ElevatedButton, 'Continue');
     await tester.ensureVisible(continueFinder);
     await tester.tap(continueFinder);
     await tester.pumpAndSettle();
 
-    // 5. Main shell is now unlocked!
-    expect(find.text('FairScope Scan'), findsOneWidget);
-    expect(find.textContaining('Member A'), findsWidgets);
-
-    // 6. Tabs switch properly
-    await tester.tap(find.byIcon(Icons.sensors_outlined));
+    // 3. Switch to Sensor Tab
+    final sensorTab = find.byIcon(Icons.sensors_outlined);
+    await tester.tap(sensorTab);
     await tester.pumpAndSettle();
-    expect(find.text('IoT Sensor Probe'), findsOneWidget);
-    expect(find.textContaining('Member B'), findsWidgets);
+
+    // 4. Verify Task 4 elements
+    expect(find.text('Using mock data'), findsOneWidget);
+    expect(find.text('FairScope Probe'), findsOneWidget);
+    expect(find.text('Connected'), findsOneWidget);
+    expect(find.text('Moisture'), findsOneWidget);
+    expect(find.text('Skin temperature'), findsOneWidget);
+    expect(find.text('Color index'), findsOneWidget);
+
+    // 5. Verify Disconnect interaction
+    final disconnectBtn = find.text('Disconnect');
+    expect(disconnectBtn, findsOneWidget);
+    await tester.tap(disconnectBtn);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Disconnected'), findsOneWidget);
+    expect(find.text('Connect'), findsOneWidget);
   });
 }
