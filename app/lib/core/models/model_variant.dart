@@ -8,3 +8,4 @@ enum ModelVariant {
 
   const ModelVariant(this.displayName, this.assetPath);
 }
+

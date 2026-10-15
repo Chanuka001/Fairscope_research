@@ -12,3 +12,4 @@ abstract class BenchmarkService {
     void Function(double progress, String status)? onProgress,
   });
 }
+

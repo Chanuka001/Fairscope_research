@@ -18,3 +18,4 @@ abstract class SensorBleService {
   /// Disconnects from the probe.
   Future<void> disconnect();
 }
+

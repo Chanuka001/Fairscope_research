@@ -13,3 +13,4 @@ abstract class CameraService {
   /// Disposes camera resources.
   void dispose();
 }
+

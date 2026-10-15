@@ -23,3 +23,4 @@ class ModelConfig {
   static const int defaultWarmupRuns = 10;
   static const String currentModelVersion = 'standin_mobilenet_v1';
 }
+

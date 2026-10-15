@@ -12,3 +12,4 @@ abstract class ExplainService {
   /// Loads accuracy disparity data grouped by Fitzpatrick skin types (I through VI).
   Future<Map<String, dynamic>> getSkinToneFairnessData();
 }
+

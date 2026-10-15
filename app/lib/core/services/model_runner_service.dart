@@ -19,3 +19,4 @@ abstract class ModelRunnerService {
   /// Releases interpreter native memory.
   void dispose();
 }
+

@@ -69,3 +69,4 @@ class CurrentScanNotifier extends Notifier<CurrentScan> {
 
 final currentScanProvider =
     NotifierProvider<CurrentScanNotifier, CurrentScan>(CurrentScanNotifier.new);
+

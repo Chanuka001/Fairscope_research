@@ -12,3 +12,4 @@ abstract class ResultsRepository {
   /// Loads sample or offline fairness audit results across Fitzpatrick skin types.
   Future<Map<String, dynamic>> loadFairnessResults();
 }
+
