@@ -112,3 +112,4 @@ class _SparklinePainter extends CustomPainter {
     return oldDelegate.dataPoints != dataPoints || oldDelegate.lineColor != lineColor;
   }
 }
+

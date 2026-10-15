@@ -17,3 +17,4 @@ final sensorReadingStreamProvider = StreamProvider<SensorReading>((ref) {
   final service = ref.watch(sensorServiceProvider);
   return service.readingsStream;
 });
+
