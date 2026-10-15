@@ -82,3 +82,6 @@ dashboard/yarn-error.log*
 
 # Logs & Benchmarks temporary outputs
 *.log
+
+# Agents
+.agents
