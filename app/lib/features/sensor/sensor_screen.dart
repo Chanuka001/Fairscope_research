@@ -22,3 +22,4 @@ class SensorScreen extends StatelessWidget {
     );
   }
 }
+

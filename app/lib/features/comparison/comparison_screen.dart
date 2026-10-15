@@ -22,3 +22,4 @@ class ComparisonScreen extends StatelessWidget {
     );
   }
 }
+

@@ -38,3 +38,4 @@ class AppColors {
   static const Color disabledFill = Color(0xFFE2E8F0);
   static const Color disabledText = Color(0xFF94A3B8);
 }
+
