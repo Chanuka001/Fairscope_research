@@ -6,11 +6,9 @@ class ScanScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('FairScope Scan'),
-      ),
-      body: const OwnerPlaceholderCard(
+    return const Scaffold(
+      body: SafeArea(
+        child: OwnerPlaceholderCard(
         title: 'Camera & Condition Scan',
         owner: 'Member A',
         role: 'AI: Image Branch & Rare-Class Detection',
@@ -19,7 +17,8 @@ class ScanScreen extends StatelessWidget {
         icon: Icons.camera_alt_outlined,
         badgeText: 'Member A • In progress',
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
