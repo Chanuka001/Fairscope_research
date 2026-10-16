@@ -230,19 +230,19 @@ BLE package (`flutter_blue_plus` or `flutter_reactive_ble`) is Member B's decisi
 
 Do these in order. Each task ends with the app running on a real phone and a Git commit.
 
-| # | Task | Done when |
-|---|---|---|
-| 1 | Create project structure per Section 3, set up Riverpod, theme, bottom navigation with 4 placeholder tabs | App runs, tabs switch, each shows its owner label |
-| 2 | Onboarding placeholder with consent button that unlocks the app | First launch shows onboarding, then the main shell |
-| 3 | Define data classes and abstract service interfaces (`ModelRunnerService`, `BenchmarkService`, `SensorBleService`, `CameraService`, `ResultsRepository`, `ExplainService`) | Compiles, interfaces documented with comments |
-| 4 | Implement `SensorBleService` mock (fake readings stream) and show it on the Sensor tab | Live fake values update without rebuilding the whole screen |
-| 5 | Add the stand-in fp32 model, implement `ModelRunnerService`, run one inference on a bundled test image | Prediction and tensor shapes logged and shown |
-| 6 | Add the int8 model; handle its input/output types | Both variants run on the same image |
-| 7 | Implement `BenchmarkService` per Section 6 | Returns timing stats for both variants |
-| 8 | Build the Comparison screen (run benchmark, show fp32 vs int8 table, speedup, size) and save the result JSON | Real numbers displayed and saved |
-| 9 | Basic camera capture on the Scan tab feeding the model, with "Placeholder model" label | Take a photo, see a prediction |
-| 10 | `ResultsRepository` with sample JSON; placeholder chart and heatmap on the Explain tab | Sample data shown, clearly labelled |
-| 11 | Polish: error states, loading indicators, empty states | No crashes on permission denial or missing files |
+| # | Task | Owner | Done when | Status |
+|---|---|---|---|---|
+| 1 | Create project structure per Section 3, set up Riverpod, theme, bottom navigation with 4 placeholder tabs | Member C | App runs, tabs switch, each shows its owner label | **Complete** |
+| 2 | Onboarding placeholder with consent button that unlocks the app | Member D / C | First launch shows onboarding, then the main shell | **Complete** |
+| 3 | Define data classes and abstract service interfaces (`ModelRunnerService`, `BenchmarkService`, `SensorBleService`, `CameraService`, `ResultsRepository`, `ExplainService`) | Member C | Compiles, interfaces documented with comments | **Complete** |
+| 4 | Implement `SensorBleService` mock (fake readings stream) and show it on the Sensor tab | Member B / C | Live fake values update without rebuilding the whole screen | **Complete** |
+| 5 | Add the stand-in fp32 model, implement `ModelRunnerService`, run one inference on a bundled test image | Member C | Prediction and tensor shapes logged and shown | **Complete** |
+| 6 | Add the int8 model; handle its input/output types | Member C | Both variants run on the same image | **Complete** |
+| 7 | Implement `BenchmarkService` per Section 6 | Member C | Returns timing stats for both variants | **Complete** |
+| 8 | Build the Comparison screen (run benchmark, show fp32 vs int8 table, speedup, size) and save the result JSON | Member C | Real numbers displayed and saved | **Complete** |
+| 9 | Unified probe/camera scan on Scan tab feeding the model with direct link to Explain, with "Placeholder model" label | Member A / C | Trigger capture, view prediction & link to Explain | **In progress** |
+| 10 | `ResultsRepository` with sample JSON; Grad-CAM heatmap with opacity slider and Fitzpatrick fairness chart on Explain tab | Member D / C | Interactive heatmap and fairness chart shown, clearly labelled | **In progress** |
+| 11 | Polish: error states, loading indicators, empty states | All | No crashes on permission denial or missing files | Planned |
 
 ---
 
