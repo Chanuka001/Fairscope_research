@@ -127,8 +127,13 @@ class TfliteBenchmarkService implements BenchmarkService {
 
     // 1. Warm-up iterations (not counted per Section 6)
     for (int i = 0; i < warmupRuns; i++) {
+      onProgress?.call(
+        progressStart * (i / warmupRuns),
+        '$variantLabel: warming up (${i + 1}/$warmupRuns)...',
+      );
       interpreter.run(input, outputBuffer);
-      await Future.delayed(Duration.zero);
+      // Yield to Android OS Looper so UI updates and watchdog never triggers ANR
+      await Future.delayed(const Duration(milliseconds: 15));
     }
 
     // 2. Timed iterations (time ONLY interpreter call)
@@ -141,11 +146,12 @@ class TfliteBenchmarkService implements BenchmarkService {
       sw.stop();
       latencies.add(sw.elapsedMicroseconds / 1000.0); // in milliseconds
 
-      if (i % 5 == 0 || i == runs - 1) {
-        final currentProgress = progressStart + (progressRange * (i / runs));
+      final currentProgress = progressStart + (progressRange * ((i + 1) / runs));
+      if (i % 2 == 0 || i == runs - 1) {
         onProgress?.call(currentProgress, '$variantLabel: run ${i + 1}/$runs');
-        await Future.delayed(Duration.zero);
       }
+      // Yield to Android OS Looper between runs to maintain 60 FPS
+      await Future.delayed(const Duration(milliseconds: 15));
     }
 
     // 3. Compute statistics
