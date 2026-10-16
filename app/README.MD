@@ -52,12 +52,12 @@ Three layers. UI never talks to the model or hardware directly; it goes through 
 |---|---|---|
 | `ModelRunnerService` | Member C | Real implementation (`tflite_flutter`) |
 | `BenchmarkService` | Member C | Real implementation |
-| `ResultsRepository` | Member C | Loads JSON from assets; sample data |
+| `ResultsRepository` | Member C | Loads JSON from assets/storage; sample data |
 | `SensorBleService` | Interface and mock: C. Real BLE: B | Mock only |
-| `CameraService` | Interface: C + A. Real capture: A | Basic capture, simple preprocessing |
-| `ExplainService` | Member D | Placeholder (returns a dummy overlay) |
+| `CameraService` | Interface: C + A. Probe/phone capture: A | Probe micro-camera stream or phone camera capture |
+| `ExplainService` | Member D | Placeholder (returns Grad-CAM overlay and fairness audit) |
 
-Each service is an **abstract class** plus one or more implementations, so a mock can be swapped for the real one without changing UI code.
+Each service is an **abstract class** plus one or more implementations, so a mock can be swapped for the real one without changing UI code. (e.g., swapping phone camera for probe-mounted micro-camera stream).
 
 ### Shared state
 
@@ -108,10 +108,10 @@ Bottom navigation with 4 tabs, plus a first-launch onboarding flow.
 | Screen | Owner | This version |
 |---|---|---|
 | Onboarding / consent | D | Placeholder screen with an "I agree" button that unlocks the app |
-| Scan | A | Camera capture, show prediction from the stand-in model, "Placeholder model" label |
-| Sensor | B | Shows live fake readings from the mock service, connection status |
-| Comparison | **C** | Runs fp32 vs int8 on the same input, shows latency, file size, speedup |
-| Explain | D | Placeholder heatmap and sample fairness chart, clearly labelled as sample data |
+| Scan | A | Probe targeting, capture, condition prediction, with direct link to Explain screen ("Placeholder model" label) |
+| Sensor | B | Shows live fake readings from the mock service, probe connection status & telemetry |
+| Comparison | **C** | Runs fp32 vs int8 on the same input, shows latency, file size, speedup, and JSON persistence |
+| Explain | D | Grad-CAM heatmap with opacity control and cross-population fairness chart across Fitzpatrick types |
 
 Every placeholder screen shows the owner (for example "Member D: explainability, coming soon").
 
