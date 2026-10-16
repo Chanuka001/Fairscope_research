@@ -240,8 +240,8 @@ Do these in order. Each task ends with the app running on a real phone and a Git
 | 6 | Add the int8 model; handle its input/output types | Member C | Both variants run on the same image | **Complete** |
 | 7 | Implement `BenchmarkService` per Section 6 | Member C | Returns timing stats for both variants | **Complete** |
 | 8 | Build the Comparison screen (run benchmark, show fp32 vs int8 table, speedup, size) and save the result JSON | Member C | Real numbers displayed and saved | **Complete** |
-| 9 | Unified probe/camera scan on Scan tab feeding the model with direct link to Explain, with "Placeholder model" label | Member A / C | Trigger capture, view prediction & link to Explain | **In progress** |
-| 10 | `ResultsRepository` with sample JSON; Grad-CAM heatmap with opacity slider and Fitzpatrick fairness chart on Explain tab | Member D / C | Interactive heatmap and fairness chart shown, clearly labelled | **In progress** |
+| 9 | Unified probe/camera scan on Scan tab feeding the model with direct link to Explain, with "Placeholder model" label | Member A / C | Trigger capture, view prediction & link to Explain | **Complete** |
+| 10 | `ResultsRepository` with sample JSON; Grad-CAM heatmap with opacity slider and Fitzpatrick fairness chart on Explain tab | Member D / C | Interactive heatmap and fairness chart shown, clearly labelled | **Complete** |
 | 11 | Polish: error states, loading indicators, empty states | All | No crashes on permission denial or missing files | Planned |
 
 ---
