@@ -187,3 +187,4 @@ class TfliteModelRunnerService implements ModelRunnerService {
     _isInitialized = false;
   }
 }
+

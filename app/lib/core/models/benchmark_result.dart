@@ -125,5 +125,42 @@ class BenchmarkReport {
           .toList(),
     );
   }
+
+  /// Default reference report matching Section 6 of app/README.md and compare4.png design
+  static BenchmarkReport get sample => const BenchmarkReport(
+        device: 'Pixel 6a',
+        androidVersion: '14',
+        date: '2026-04-18',
+        modelVersion: 'v0.1-mobilenetv2-placeholder',
+        runs: 50,
+        warmupRuns: 10,
+        variants: [
+          ModelVariantBenchmark(
+            name: 'baseline_fp32',
+            sizeMb: 14.0,
+            latencyMs: LatencyStats(
+              mean: 42.0,
+              median: 38.0,
+              min: 35.0,
+              max: 58.0,
+              std: 6.0,
+            ),
+            preprocessMsMean: 2.5,
+          ),
+          ModelVariantBenchmark(
+            name: 'quantized_int8',
+            sizeMb: 3.8,
+            latencyMs: LatencyStats(
+              mean: 15.0,
+              median: 13.0,
+              min: 11.0,
+              max: 22.0,
+              std: 3.0,
+            ),
+            preprocessMsMean: 2.5,
+          ),
+        ],
+      );
 }
+
 

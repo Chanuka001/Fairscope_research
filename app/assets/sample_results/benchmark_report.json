@@ -1,0 +1,41 @@
+{
+  "device": "Android Device",
+  "android_version": "14",
+  "date": "2026-04-18",
+  "model_version": "v0.1-mobilenetv2-placeholder",
+  "runs": 50,
+  "warmup_runs": 10,
+  "variants": [
+    {
+      "name": "baseline_fp32",
+      "size_mb": 14.0,
+      "latency_ms": {
+        "mean": 42.0,
+        "median": 38.0,
+        "min": 35.0,
+        "max": 58.0,
+        "std": 6.0
+      },
+      "preprocess_ms_mean": 2.5,
+      "peak_ram_mb": null,
+      "accuracy_overall": null,
+      "accuracy_rare": null
+    },
+    {
+      "name": "quantized_int8",
+      "size_mb": 3.8,
+      "latency_ms": {
+        "mean": 15.0,
+        "median": 13.0,
+        "min": 11.0,
+        "max": 22.0,
+        "std": 3.0
+      },
+      "preprocess_ms_mean": 2.5,
+      "peak_ram_mb": null,
+      "accuracy_overall": null,
+      "accuracy_rare": null
+    }
+  ]
+}
+
