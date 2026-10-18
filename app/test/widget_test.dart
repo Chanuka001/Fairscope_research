@@ -81,7 +81,12 @@ void main() {
     final analyseBtn = find.widgetWithText(FilledButton, 'Analyse');
     expect(analyseBtn, findsOneWidget);
     await tester.tap(analyseBtn);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.runAsync(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    });
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
 
     // 7. Verify Step 2 is displayed
     expect(find.text('Result'), findsOneWidget);
@@ -89,8 +94,8 @@ void main() {
     // Verify bottom nav is now HIDDEN
     expect(find.byType(NavigationBar), findsNothing);
 
-    // 8. Tap 'Explain' button to go to Step 3
-    final explainBtn = find.widgetWithText(FilledButton, 'Explain');
+    // 8. Tap 'Explain prediction' button to go to Step 3
+    final explainBtn = find.widgetWithText(FilledButton, 'Explain prediction');
     expect(explainBtn, findsOneWidget);
     await tester.ensureVisible(explainBtn);
     await tester.pumpAndSettle();

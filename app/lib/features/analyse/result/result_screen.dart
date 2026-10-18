@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/navigation/step_indicator.dart';
+import '../../../../core/state/model_state.dart';
 import '../../../../core/state/nav_state.dart';
 import '../../../../core/state/probe_state.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -8,13 +9,32 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
 /// Step 2: Result Summary (Owned by Member A + C)
-class ResultScreen extends ConsumerWidget {
+class ResultScreen extends ConsumerStatefulWidget {
   const ResultScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ResultScreen> createState() => _ResultScreenState();
+}
+
+class _ResultScreenState extends ConsumerState<ResultScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      final capture = ref.read(selectedCaptureProvider);
+      final currentPrediction = ref.read(analysisProvider).prediction;
+      if (capture != null && currentPrediction == null) {
+        ref.read(analysisProvider.notifier).analyseCapture(capture);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final navController = ref.read(navigationControllerProvider);
     final selectedCapture = ref.watch(selectedCaptureProvider);
+    final activeVariant = ref.watch(activeModelVariantProvider);
+    final analysis = ref.watch(analysisProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -40,7 +60,10 @@ class ResultScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding, vertical: AppSpacing.s12),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.screenPadding,
+            vertical: AppSpacing.s12,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -95,7 +118,7 @@ class ResultScreen extends ConsumerWidget {
                     label: 'Moisture',
                     value: selectedCapture != null
                         ? '${selectedCapture.sensorReading.moisture.toStringAsFixed(1)}%'
-                        : '42%',
+                        : '42.0%',
                     bgColor: AppColors.sensorMoistureBg,
                     iconColor: AppColors.sensorMoistureIcon,
                   ),
@@ -115,7 +138,7 @@ class ResultScreen extends ConsumerWidget {
                     label: 'Color Index',
                     value: selectedCapture != null
                         ? '${selectedCapture.sensorReading.colorIndex}'
-                        : '68',
+                        : '3',
                     bgColor: AppColors.sensorColorBg,
                     iconColor: AppColors.sensorColorIcon,
                   ),
@@ -123,7 +146,41 @@ class ResultScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.s16),
 
-              // Prediction Result Card matching Showcase Screen 4
+              // Model Variant Switcher Pill
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Variant:',
+                    style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+                  SegmentedButton<String>(
+                    segments: const [
+                      ButtonSegment(value: 'baseline_fp32', label: Text('FP32')),
+                      ButtonSegment(value: 'quantized_int8', label: Text('INT8')),
+                    ],
+                    selected: {activeVariant},
+                    onSelectionChanged: (set) {
+                      final chosen = set.first;
+                      ref.read(activeModelVariantProvider.notifier).setVariant(chosen);
+                      if (selectedCapture != null) {
+                        ref.read(analysisProvider.notifier).analyseCapture(
+                              selectedCapture,
+                              variant: chosen,
+                            );
+                      }
+                    },
+                    style: ButtonStyle(
+                      visualDensity: VisualDensity.compact,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.s16),
+
+              // Prediction Result Card
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(AppSpacing.cardPadding),
@@ -133,115 +190,134 @@ class ResultScreen extends ConsumerWidget {
                   border: Border.all(color: AppColors.border),
                   boxShadow: AppShadows.level1,
                 ),
-                child: Column(
-                  children: [
-                    Text(
-                      'Predicted skin condition',
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.secondaryText,
-                        fontSize: 13.0,
-                      ),
-                    ),
-                    const SizedBox(height: 6.0),
-                    Text(
-                      'Normal skin',
-                      style: AppTextStyles.headline.copyWith(
-                        color: AppColors.text,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 22.0,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.s16),
-
-                    // Circular confidence gauge
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        SizedBox(
-                          width: 86.0,
-                          height: 86.0,
-                          child: CircularProgressIndicator(
-                            value: 0.87,
-                            strokeWidth: 6.0,
-                            strokeCap: StrokeCap.round,
-                            backgroundColor: AppColors.primaryContainer.withValues(alpha: 0.6),
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
+                child: analysis.isLoading
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 36.0),
+                        child: Column(
                           children: [
-                            Text(
-                              '87%',
-                              style: AppTextStyles.title.copyWith(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 20.0,
-                                color: AppColors.text,
+                            const SizedBox(
+                              width: 32.0,
+                              height: 32.0,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3.0,
+                                color: AppColors.primary,
                               ),
                             ),
+                            const SizedBox(height: AppSpacing.s12),
                             Text(
-                              'confidence',
-                              style: AppTextStyles.caption.copyWith(
-                                fontSize: 10.0,
-                                color: AppColors.secondaryText,
-                              ),
+                              'Running on-device inference ($activeVariant)...',
+                              style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.s16),
+                      )
+                    : Column(
+                        children: [
+                          Text(
+                            'Predicted skin condition',
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.secondaryText,
+                              fontSize: 13.0,
+                            ),
+                          ),
+                          const SizedBox(height: 6.0),
+                          Text(
+                            analysis.prediction?.label ?? 'Normal (Healthy skin)',
+                            style: AppTextStyles.headline.copyWith(
+                              color: AppColors.text,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 22.0,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: AppSpacing.s16),
 
-                    // Placeholder Model Tag
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12, vertical: 4.0),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryContainer.withValues(alpha: 0.7),
-                        borderRadius: BorderRadius.circular(AppRadii.small),
+                          // Circular confidence gauge
+                          Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              SizedBox(
+                                width: 86.0,
+                                height: 86.0,
+                                child: CircularProgressIndicator(
+                                  value: analysis.prediction?.confidence ?? 0.88,
+                                  strokeWidth: 6.0,
+                                  strokeCap: StrokeCap.round,
+                                  backgroundColor: AppColors.primaryContainer.withValues(alpha: 0.6),
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    analysis.prediction?.formattedConfidence ?? '88%',
+                                    style: AppTextStyles.title.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 20.0,
+                                      color: AppColors.text,
+                                    ),
+                                  ),
+                                  Text(
+                                    'confidence',
+                                    style: AppTextStyles.caption.copyWith(
+                                      fontSize: 10.0,
+                                      color: AppColors.secondaryText,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.s16),
+
+                          // Placeholder Model Tag (Mandatory per spec)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12, vertical: 4.0),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryContainer.withValues(alpha: 0.7),
+                              borderRadius: BorderRadius.circular(AppRadii.small),
+                            ),
+                            child: Text(
+                              'Placeholder model',
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.onPrimaryContainer,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      child: Text(
-                        'Placeholder model',
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.onPrimaryContainer,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ),
               const SizedBox(height: AppSpacing.s12),
 
               // Timing Pill
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16, vertical: AppSpacing.s8),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppRadii.medium),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.bolt_rounded,
-                      size: 16.0,
-                      color: AppColors.warning,
-                    ),
-                    const SizedBox(width: AppSpacing.s8),
-                    Text(
-                      'Inference time: 320 ms',
-                      style: AppTextStyles.label.copyWith(
-                        color: AppColors.text,
-                        fontWeight: FontWeight.w600,
+              if (analysis.inferenceMs != null || analysis.preprocessMs != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16, vertical: AppSpacing.s8),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(AppRadii.medium),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.timer_outlined, size: 14.0, color: AppColors.secondaryText),
+                      const SizedBox(width: AppSpacing.s6),
+                      Text(
+                        'Preprocess: ${(analysis.preprocessMs ?? 0).toStringAsFixed(1)} ms  •  Inference: ${(analysis.inferenceMs ?? 0).toStringAsFixed(1)} ms',
+                        style: AppTextStyles.caption.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.secondaryText,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
               const SizedBox(height: AppSpacing.s20),
 
-              // Explain Primary Button
+              // Primary Action: Explain Button
               FilledButton(
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
@@ -250,19 +326,15 @@ class ResultScreen extends ConsumerWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppRadii.medium),
                   ),
-                  elevation: 0,
                 ),
-                onPressed: () {
-                  navController.goToStep(3);
-                },
+                onPressed: () => navController.goToStep(3),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Explain',
+                      'Explain prediction',
                       style: AppTextStyles.label.copyWith(
                         fontWeight: FontWeight.w700,
-                        fontSize: 16.0,
                         color: AppColors.onPrimary,
                       ),
                     ),
@@ -271,6 +343,7 @@ class ResultScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: AppSpacing.s24),
             ],
           ),
         ),

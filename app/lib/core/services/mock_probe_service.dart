@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'package:image/image.dart' as img;
 import '../models/capture.dart';
 import '../models/sensor_reading.dart';
 import 'probe_service.dart';
@@ -76,8 +77,10 @@ class MockProbeService implements ProbeService {
       final byteData = await rootBundle.load(assetPath);
       imageBytes = byteData.buffer.asUint8List();
     } catch (_) {
-      // Fallback for isolated headless unit tests without Flutter asset bundle
-      imageBytes = Uint8List.fromList(List.generate(256, (i) => (i + index) % 256));
+      // Fallback for isolated headless unit tests without Flutter asset bundle: valid 32x32 image
+      final sample = img.Image(width: 32, height: 32);
+      img.fill(sample, color: img.ColorRgb8(200, 160, 120));
+      imageBytes = Uint8List.fromList(img.encodeJpg(sample));
     }
 
     // Generate realistic skin sensor telemetry
