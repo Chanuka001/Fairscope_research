@@ -16,8 +16,16 @@ class HistoryScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('History'),
+        title: Text(
+          'History',
+          style: AppTextStyles.headline.copyWith(
+            fontWeight: FontWeight.w700,
+            color: AppColors.text,
+          ),
+        ),
         centerTitle: false,
+        elevation: 0,
+        backgroundColor: AppColors.background,
       ),
       body: SafeArea(
         child: Column(
@@ -28,13 +36,32 @@ class HistoryScreen extends ConsumerWidget {
                 horizontal: AppSpacing.screenPadding,
                 vertical: AppSpacing.s8,
               ),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search by ID or label',
-                  prefixIcon: const Icon(Icons.search_rounded, color: AppColors.secondaryText),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.tune_rounded, color: AppColors.secondaryText),
-                    onPressed: () {},
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadii.medium),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: AppShadows.level1,
+                ),
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Search by ID or label',
+                    hintStyle: AppTextStyles.body.copyWith(
+                      color: AppColors.secondaryText,
+                      fontSize: 14.0,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.search_rounded,
+                      color: AppColors.secondaryText,
+                      size: 20.0,
+                    ),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.s16,
+                      vertical: AppSpacing.s12,
+                    ),
                   ),
                 ),
               ),
@@ -43,7 +70,7 @@ class HistoryScreen extends ConsumerWidget {
             // History Records List
             Expanded(
               child: ListView(
-                padding: AppSpacing.screenPaddingAll,
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding, vertical: AppSpacing.s8),
                 children: [
                   _buildHistoryCard(
                     id: 'FS-0003',
@@ -51,7 +78,6 @@ class HistoryScreen extends ConsumerWidget {
                     timestamp: '16 Sep 2026 • 14:32',
                     avatarAsset: 'assets/images/avatas/user_avatar_type_II.png',
                     onTap: () {
-                      // Opens the scan result in the 4-step flow
                       navController.setTab(0);
                       navController.goToStep(2);
                     },
@@ -83,7 +109,10 @@ class HistoryScreen extends ConsumerWidget {
                     child: Text(
                       'Only analysed captures are saved to History.\nData stays locally in private storage.',
                       textAlign: TextAlign.center,
-                      style: AppTextStyles.caption,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.secondaryText,
+                        height: 1.4,
+                      ),
                     ),
                   ),
                 ],
@@ -105,78 +134,96 @@ class HistoryScreen extends ConsumerWidget {
     return Material(
       color: AppColors.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: AppRadii.brLarge,
+        borderRadius: BorderRadius.circular(AppRadii.large),
         side: const BorderSide(color: AppColors.border),
       ),
       clipBehavior: Clip.antiAlias,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.s16,
-          vertical: AppSpacing.s8,
-        ),
-        leading: Container(
-          width: 48.0,
-          height: 48.0,
-          decoration: BoxDecoration(
-            color: AppColors.surfaceVariant,
-            borderRadius: AppRadii.brMedium,
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Image.asset(
-            avatarAsset,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => const Icon(
-              Icons.face_rounded,
-              color: AppColors.primary,
-            ),
-          ),
-        ),
-        title: Row(
-          children: [
-            Text(
-              id,
-              style: AppTextStyles.label.copyWith(
-                fontWeight: FontWeight.w700,
-                color: AppColors.primary,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.s8),
-            Text(
-              condition,
-              style: AppTextStyles.label.copyWith(fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4.0),
-          child: Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            runSpacing: 4.0,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.s12),
+          child: Row(
             children: [
-              Text(timestamp, style: AppTextStyles.caption),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                width: 52.0,
+                height: 52.0,
                 decoration: BoxDecoration(
                   color: AppColors.surfaceVariant,
-                  borderRadius: AppRadii.brSmall,
+                  borderRadius: BorderRadius.circular(AppRadii.medium),
+                  border: Border.all(color: AppColors.border),
                 ),
-                child: Text(
-                  'Placeholder model',
-                  style: AppTextStyles.caption.copyWith(fontSize: 10.0),
+                clipBehavior: Clip.antiAlias,
+                child: Image.asset(
+                  avatarAsset,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => const Icon(
+                    Icons.face_rounded,
+                    color: AppColors.primary,
+                  ),
                 ),
+              ),
+              const SizedBox(width: AppSpacing.s12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          id,
+                          style: AppTextStyles.label.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.s8),
+                        Text(
+                          condition,
+                          style: AppTextStyles.label.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.text,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4.0),
+                    Row(
+                      children: [
+                        Text(
+                          timestamp,
+                          style: AppTextStyles.caption.copyWith(color: AppColors.secondaryText),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryContainer.withValues(alpha: 0.6),
+                            borderRadius: BorderRadius.circular(AppRadii.extraSmall),
+                          ),
+                          child: Text(
+                            'Placeholder model',
+                            style: AppTextStyles.caption.copyWith(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.onPrimaryContainer,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.s8),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14.0,
+                color: AppColors.secondaryText,
               ),
             ],
           ),
         ),
-        trailing: const Icon(
-          Icons.arrow_forward_ios_rounded,
-          size: 14.0,
-          color: AppColors.secondaryText,
-        ),
-        onTap: onTap,
       ),
     );
   }
 }
-

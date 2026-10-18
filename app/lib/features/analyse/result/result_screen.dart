@@ -17,14 +17,16 @@ class ResultScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        elevation: 0,
+        backgroundColor: AppColors.surface,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.text),
           onPressed: () => navController.handleBack(),
         ),
         title: Column(
           children: [
-            Text('Result', style: AppTextStyles.title),
-            Text('Step 2 of 4', style: AppTextStyles.caption),
+            Text('Result', style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w700)),
+            Text('Step 2 of 4', style: AppTextStyles.caption.copyWith(color: AppColors.secondaryText)),
           ],
         ),
         actions: const [
@@ -36,18 +38,19 @@ class ResultScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: AppSpacing.screenPaddingAll,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding, vertical: AppSpacing.s12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Image container
+              // Face Region Photo Card
               Container(
                 width: double.infinity,
-                height: 220.0,
+                height: 230.0,
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
-                  borderRadius: AppRadii.brLarge,
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadii.large),
                   border: Border.all(color: AppColors.border),
+                  boxShadow: AppShadows.level1,
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: Image.asset(
@@ -70,26 +73,45 @@ class ResultScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: AppSpacing.s16),
+              const SizedBox(height: AppSpacing.s12),
 
-              // Sensor reading summary
+              // Sensor Pills Row
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildMetricBadge('Moisture', '42%'),
-                  _buildMetricBadge('Temperature', '32.4°C'),
-                  _buildMetricBadge('Color Index', '68'),
+                  _buildSensorPill(
+                    icon: Icons.water_drop_rounded,
+                    label: 'Moisture',
+                    value: '42%',
+                    bgColor: AppColors.sensorMoistureBg,
+                    iconColor: AppColors.sensorMoistureIcon,
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+                  _buildSensorPill(
+                    icon: Icons.device_thermostat_rounded,
+                    label: 'Temperature',
+                    value: '32.4°C',
+                    bgColor: AppColors.sensorTempBg,
+                    iconColor: AppColors.sensorTempIcon,
+                  ),
+                  const SizedBox(width: AppSpacing.s8),
+                  _buildSensorPill(
+                    icon: Icons.palette_outlined,
+                    label: 'Color Index',
+                    value: '68',
+                    bgColor: AppColors.sensorColorBg,
+                    iconColor: AppColors.sensorColorIcon,
+                  ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.s24),
+              const SizedBox(height: AppSpacing.s16),
 
-              // Analysis Card
+              // Prediction Result Card matching Showcase Screen 4
               Container(
                 width: double.infinity,
-                padding: AppSpacing.cardPaddingAll,
+                padding: const EdgeInsets.all(AppSpacing.cardPadding),
                 decoration: BoxDecoration(
                   color: AppColors.surface,
-                  borderRadius: AppRadii.brLarge,
+                  borderRadius: BorderRadius.circular(AppRadii.large),
                   border: Border.all(color: AppColors.border),
                   boxShadow: AppShadows.level1,
                 ),
@@ -97,59 +119,67 @@ class ResultScreen extends ConsumerWidget {
                   children: [
                     Text(
                       'Predicted skin condition',
-                      style: AppTextStyles.caption.copyWith(color: AppColors.secondaryText),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.secondaryText,
+                        fontSize: 13.0,
+                      ),
                     ),
-                    const SizedBox(height: AppSpacing.s8),
+                    const SizedBox(height: 6.0),
                     Text(
                       'Normal skin',
                       style: AppTextStyles.headline.copyWith(
-                        color: AppColors.primary,
+                        color: AppColors.text,
                         fontWeight: FontWeight.w700,
+                        fontSize: 22.0,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.s16),
 
-                    // Confidence ring indicator
-                    Container(
-                      width: 84.0,
-                      height: 84.0,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.primary,
-                          width: 4.0,
+                    // Circular confidence gauge
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          width: 86.0,
+                          height: 86.0,
+                          child: CircularProgressIndicator(
+                            value: 0.87,
+                            strokeWidth: 6.0,
+                            strokeCap: StrokeCap.round,
+                            backgroundColor: AppColors.primaryContainer.withValues(alpha: 0.6),
+                            color: AppColors.primary,
+                          ),
                         ),
-                      ),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               '87%',
                               style: AppTextStyles.title.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.primary,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 20.0,
+                                color: AppColors.text,
                               ),
                             ),
                             Text(
                               'confidence',
-                              style: AppTextStyles.caption.copyWith(fontSize: 10.0),
+                              style: AppTextStyles.caption.copyWith(
+                                fontSize: 10.0,
+                                color: AppColors.secondaryText,
+                              ),
                             ),
                           ],
                         ),
-                      ),
+                      ],
                     ),
                     const SizedBox(height: AppSpacing.s16),
 
                     // Placeholder Model Tag
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.s12,
-                        vertical: AppSpacing.s4,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12, vertical: 4.0),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryContainer,
-                        borderRadius: AppRadii.brSmall,
+                        color: AppColors.primaryContainer.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(AppRadii.small),
                       ),
                       child: Text(
                         'Placeholder model',
@@ -162,18 +192,15 @@ class ResultScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-
-              const SizedBox(height: AppSpacing.s16),
+              const SizedBox(height: AppSpacing.s12),
 
               // Timing Pill
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.s16,
-                  vertical: AppSpacing.s8,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16, vertical: AppSpacing.s8),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
-                  borderRadius: AppRadii.brMedium,
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadii.medium),
+                  border: Border.all(color: AppColors.border),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -194,20 +221,35 @@ class ResultScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: AppSpacing.s20),
 
-              const SizedBox(height: AppSpacing.s24),
-
-              // Explain Button
+              // Explain Primary Button
               FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.onPrimary,
+                  minimumSize: const Size.fromHeight(48.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadii.medium),
+                  ),
+                  elevation: 0,
+                ),
                 onPressed: () {
                   navController.goToStep(3);
                 },
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Explain'),
-                    SizedBox(width: AppSpacing.s8),
-                    Icon(Icons.arrow_forward_rounded, size: 18.0),
+                    Text(
+                      'Explain',
+                      style: AppTextStyles.label.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16.0,
+                        color: AppColors.onPrimary,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.s8),
+                    const Icon(Icons.arrow_forward_rounded, size: 18.0),
                   ],
                 ),
               ),
@@ -218,14 +260,52 @@ class ResultScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMetricBadge(String label, String value) {
-    return Column(
-      children: [
-        Text(value, style: AppTextStyles.label.copyWith(fontWeight: FontWeight.w700)),
-        const SizedBox(height: 2.0),
-        Text(label, style: AppTextStyles.caption),
-      ],
+  Widget _buildSensorPill({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color bgColor,
+    required Color iconColor,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s8, vertical: AppSpacing.s8),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(AppRadii.medium),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 13.0, color: iconColor),
+                const SizedBox(width: 4.0),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: AppTextStyles.caption.copyWith(
+                      fontSize: 10.0,
+                      color: iconColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 3.0),
+            Text(
+              value,
+              style: AppTextStyles.label.copyWith(
+                fontWeight: FontWeight.w700,
+                fontSize: 14.0,
+                color: AppColors.text,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
-

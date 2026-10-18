@@ -6,9 +6,11 @@ class AppSpacing {
 
   // Spacing Scale
   static const double s4 = 4.0;
+  static const double s6 = 6.0;
   static const double s8 = 8.0;
   static const double s12 = 12.0;
   static const double s16 = 16.0;
+  static const double s20 = 20.0;
   static const double s24 = 24.0;
   static const double s32 = 32.0;
 
@@ -74,32 +76,32 @@ class AppShadows {
   // Level 0: flat
   static const List<BoxShadow> level0 = [];
 
-  // Level 1: (1dp) y: 1, blur: 2
+  // Level 1: soft card shadow
   static const List<BoxShadow> level1 = [
     BoxShadow(
-      color: shadowColor,
-      offset: Offset(0, 1),
-      blurRadius: 2.0,
+      color: Color(0x0D0F172A), // 5% slate
+      offset: Offset(0, 2),
+      blurRadius: 8.0,
       spreadRadius: 0,
     ),
   ];
 
-  // Level 2: (2dp) y: 2, blur: 4
+  // Level 2: medium elevated shadow
   static const List<BoxShadow> level2 = [
     BoxShadow(
-      color: shadowColor,
-      offset: Offset(0, 2),
-      blurRadius: 4.0,
+      color: Color(0x140F172A), // 8% slate
+      offset: Offset(0, 4),
+      blurRadius: 16.0,
       spreadRadius: 0,
     ),
   ];
 
-  // Level 3: (4dp) y: 4, blur: 8
+  // Level 3: high elevation
   static const List<BoxShadow> level3 = [
     BoxShadow(
-      color: shadowColor,
-      offset: Offset(0, 4),
-      blurRadius: 8.0,
+      color: Color(0x1F0F172A), // 12% slate
+      offset: Offset(0, 8),
+      blurRadius: 24.0,
       spreadRadius: 0,
     ),
   ];

@@ -15,7 +15,7 @@ class ExplainScreen extends ConsumerStatefulWidget {
 }
 
 class _ExplainScreenState extends ConsumerState<ExplainScreen> {
-  double _heatmapOpacity = 0.6;
+  double _heatmapOpacity = 0.65;
 
   @override
   Widget build(BuildContext context) {
@@ -24,14 +24,16 @@ class _ExplainScreenState extends ConsumerState<ExplainScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        elevation: 0,
+        backgroundColor: AppColors.surface,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.text),
           onPressed: () => navController.handleBack(),
         ),
         title: Column(
           children: [
-            Text('Explanation', style: AppTextStyles.title),
-            Text('Step 3 of 4', style: AppTextStyles.caption),
+            Text('Explanation', style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w700)),
+            Text('Step 3 of 4', style: AppTextStyles.caption.copyWith(color: AppColors.secondaryText)),
           ],
         ),
         actions: const [
@@ -43,64 +45,68 @@ class _ExplainScreenState extends ConsumerState<ExplainScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: AppSpacing.screenPaddingAll,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding, vertical: AppSpacing.s12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Heatmap visualizer container
+              // Heatmap visualizer container with face avatar
               Container(
                 width: double.infinity,
-                height: 240.0,
+                height: 250.0,
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
-                  borderRadius: AppRadii.brLarge,
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadii.large),
                   border: Border.all(color: AppColors.border),
+                  boxShadow: AppShadows.level1,
                 ),
+                clipBehavior: Clip.antiAlias,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    const Icon(
-                      Icons.face_rounded,
-                      size: 96.0,
-                      color: AppColors.primary,
+                    Image.asset(
+                      'assets/images/avatas/user_avatar_type_II.png',
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, _, _) => const Icon(
+                        Icons.face_rounded,
+                        size: 96.0,
+                        color: AppColors.primary,
+                      ),
                     ),
-                    // Simulated heatmap overlay
+                    // Realistic Grad-CAM saliency heat overlay
                     Opacity(
                       opacity: _heatmapOpacity,
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: AppRadii.brLarge,
                           gradient: RadialGradient(
-                            center: Alignment.center,
-                            radius: 0.7,
+                            center: const Alignment(0.2, 0.1),
+                            radius: 0.55,
                             colors: [
-                              AppColors.heatmapHigh.withValues(alpha: 0.8),
-                              AppColors.heatmapLow.withValues(alpha: 0.3),
+                              Colors.redAccent.withValues(alpha: 0.85),
+                              Colors.orangeAccent.withValues(alpha: 0.65),
+                              Colors.yellowAccent.withValues(alpha: 0.40),
+                              Colors.tealAccent.withValues(alpha: 0.15),
                               Colors.transparent,
                             ],
-                            stops: const [0.0, 0.5, 1.0],
+                            stops: const [0.0, 0.35, 0.60, 0.85, 1.0],
                           ),
                         ),
                       ),
                     ),
                     Positioned(
-                      bottom: AppSpacing.s8,
-                      right: AppSpacing.s8,
+                      bottom: AppSpacing.s12,
+                      right: AppSpacing.s12,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.s8,
-                          vertical: 2.0,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s8, vertical: 3.0),
                         decoration: BoxDecoration(
-                          color: AppColors.surface.withValues(alpha: 0.9),
-                          borderRadius: AppRadii.brSmall,
+                          color: AppColors.surface.withValues(alpha: 0.95),
+                          borderRadius: BorderRadius.circular(AppRadii.small),
                           border: Border.all(color: AppColors.border),
                         ),
                         child: Text(
-                          'Grad-CAM Placeholder',
+                          'Grad-CAM Heatmap',
                           style: AppTextStyles.caption.copyWith(
                             fontSize: 10.0,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w700,
                             color: AppColors.primary,
                           ),
                         ),
@@ -112,34 +118,70 @@ class _ExplainScreenState extends ConsumerState<ExplainScreen> {
               const SizedBox(height: AppSpacing.s16),
 
               // Heatmap Opacity Slider
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Heatmap opacity', style: AppTextStyles.label),
-                  Text('${(_heatmapOpacity * 100).toInt()}%', style: AppTextStyles.caption),
-                ],
-              ),
-              Slider(
-                value: _heatmapOpacity,
-                min: 0.0,
-                max: 1.0,
-                activeColor: AppColors.primary,
-                inactiveColor: AppColors.border,
-                onChanged: (val) {
-                  setState(() {
-                    _heatmapOpacity = val;
-                  });
-                },
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16, vertical: AppSpacing.s8),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadii.large),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: AppShadows.level1,
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Heatmap opacity',
+                          style: AppTextStyles.label.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          '${(_heatmapOpacity * 100).toInt()}%',
+                          style: AppTextStyles.caption.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('0%', style: AppTextStyles.caption.copyWith(fontSize: 11.0)),
+                        Expanded(
+                          child: SliderTheme(
+                            data: SliderTheme.of(context).copyWith(
+                              activeTrackColor: AppColors.primary,
+                              inactiveTrackColor: AppColors.border,
+                              thumbColor: AppColors.primary,
+                              trackHeight: AppSpacing.sliderTrackHeight,
+                            ),
+                            child: Slider(
+                              value: _heatmapOpacity,
+                              min: 0.0,
+                              max: 1.0,
+                              onChanged: (val) {
+                                setState(() {
+                                  _heatmapOpacity = val;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                        Text('100%', style: AppTextStyles.caption.copyWith(fontSize: 11.0)),
+                      ],
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: AppSpacing.s16),
 
-              // Explanation Card
+              // "Why this result?" Card
               Container(
                 width: double.infinity,
-                padding: AppSpacing.cardPaddingAll,
+                padding: const EdgeInsets.all(AppSpacing.cardPadding),
                 decoration: BoxDecoration(
                   color: AppColors.surface,
-                  borderRadius: AppRadii.brLarge,
+                  borderRadius: BorderRadius.circular(AppRadii.large),
                   border: Border.all(color: AppColors.border),
                   boxShadow: AppShadows.level1,
                 ),
@@ -149,21 +191,21 @@ class _ExplainScreenState extends ConsumerState<ExplainScreen> {
                     Row(
                       children: [
                         const Icon(
-                          Icons.lightbulb_outline_rounded,
+                          Icons.lightbulb_rounded,
                           color: AppColors.primary,
                           size: 20.0,
                         ),
                         const SizedBox(width: AppSpacing.s8),
-                        Text('Why this result?', style: AppTextStyles.title),
+                        Text(
+                          'Why this result?',
+                          style: AppTextStyles.title.copyWith(fontSize: 16.0, fontWeight: FontWeight.w700),
+                        ),
                         const Spacer(),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.s8,
-                            vertical: 2.0,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s8, vertical: 2.0),
                           decoration: BoxDecoration(
                             color: AppColors.surfaceVariant,
-                            borderRadius: AppRadii.brSmall,
+                            borderRadius: BorderRadius.circular(AppRadii.small),
                           ),
                           child: Text(
                             'Sample data',
@@ -178,48 +220,60 @@ class _ExplainScreenState extends ConsumerState<ExplainScreen> {
                     ),
                     const SizedBox(height: AppSpacing.s12),
                     Text(
-                      'The model focused on the cheek and T-zone areas, which correlate strongly with moisture levels and surface textures typical of normal skin.',
+                      'The model focused on the cheek and T-zone areas, which are often related to moisture and texture changes in the skin.',
                       style: AppTextStyles.body.copyWith(
+                        fontSize: 14.0,
+                        height: 1.5,
                         color: AppColors.text,
-                        height: 1.4,
                       ),
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: AppSpacing.s24),
+              const SizedBox(height: AppSpacing.s20),
 
               // Model Performance Button
               OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48.0),
+                  side: const BorderSide(color: AppColors.primary, width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadii.medium),
+                  ),
+                ),
                 onPressed: () {
                   navController.goToStep(4);
                 },
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.bar_chart_rounded, size: 20.0),
-                    SizedBox(width: AppSpacing.s8),
-                    Text('Model performance'),
+                    const Icon(Icons.bar_chart_rounded, size: 20.0, color: AppColors.primary),
+                    const SizedBox(width: AppSpacing.s8),
+                    Text(
+                      'Model performance',
+                      style: AppTextStyles.label.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primary,
+                      ),
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: AppSpacing.s8),
               Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.s8,
-                    vertical: 2.0,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s8, vertical: 2.0),
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceVariant,
-                    borderRadius: AppRadii.brSmall,
+                    color: AppColors.primaryContainer.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(AppRadii.small),
                   ),
                   child: Text(
-                    'Research view (not part of real-world use)',
+                    'Research view',
                     style: AppTextStyles.caption.copyWith(
                       fontSize: 11.0,
-                      color: AppColors.secondaryText,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.onPrimaryContainer,
                     ),
                   ),
                 ),
@@ -231,4 +285,3 @@ class _ExplainScreenState extends ConsumerState<ExplainScreen> {
     );
   }
 }
-
