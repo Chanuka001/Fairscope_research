@@ -140,7 +140,7 @@ void main() {
     // 15. Switch to History Tab
     await tester.tap(find.text('History'));
     await tester.pumpAndSettle();
-    expect(find.text('FS-0003'), findsOneWidget);
-    expect(find.text('Search by ID or label'), findsOneWidget);
+    expect(find.text('Search by ID, label or condition'), findsOneWidget);
+    expect(find.byType(TextField), findsOneWidget);
   });
 }

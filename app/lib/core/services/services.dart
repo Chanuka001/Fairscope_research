@@ -1,6 +1,7 @@
 export 'benchmark_service.dart';
 export 'capture_store.dart';
 export 'explain_service.dart';
+export 'file_history_repository.dart';
 export 'history_repository.dart';
 export 'image_preprocessor.dart';
 export 'in_memory_capture_store.dart';

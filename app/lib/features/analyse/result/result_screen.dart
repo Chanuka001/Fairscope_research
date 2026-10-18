@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/models/scan_record.dart';
 import '../../../../core/navigation/step_indicator.dart';
+import '../../../../core/state/history_state.dart';
 import '../../../../core/state/model_state.dart';
 import '../../../../core/state/nav_state.dart';
 import '../../../../core/state/probe_state.dart';
@@ -20,11 +22,114 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
+    Future.microtask(() async {
       final capture = ref.read(selectedCaptureProvider);
       final currentPrediction = ref.read(analysisProvider).prediction;
       if (capture != null && currentPrediction == null) {
-        ref.read(analysisProvider.notifier).analyseCapture(capture);
+        final pred = await ref.read(analysisProvider.notifier).analyseCapture(capture);
+        if (pred != null && mounted) {
+          await _checkAndAutoSave();
+        }
+      }
+    });
+  }
+
+  Future<void> _checkAndAutoSave() async {
+    final capture = ref.read(selectedCaptureProvider);
+    final analysis = ref.read(analysisProvider);
+    final currentId = ref.read(currentScanIdProvider);
+
+    if (capture != null && analysis.prediction != null && currentId == null) {
+      await ref.read(historyProvider.notifier).saveAnalysedScan(
+            capture: capture,
+            prediction: analysis.prediction!,
+            preprocessMs: analysis.preprocessMs,
+            inferenceMs: analysis.inferenceMs,
+            modelVariant: ref.read(activeModelVariantProvider),
+          );
+    }
+  }
+
+  void _showEditLabelDialog(String scanId, String? currentLabel) {
+    final controller = TextEditingController(text: currentLabel ?? '');
+
+    showDialog<String>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadii.large),
+        ),
+        title: Text(
+          'Label $scanId',
+          style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w700),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12, vertical: AppSpacing.s8),
+              decoration: BoxDecoration(
+                color: AppColors.primaryContainer.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(AppRadii.small),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.shield_outlined, size: 16.0, color: AppColors.primary),
+                  const SizedBox(width: AppSpacing.s8),
+                  Expanded(
+                    child: Text(
+                      'Do not enter real names or personal details.',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.onPrimaryContainer,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 11.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.s16),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              decoration: InputDecoration(
+                labelText: 'Scan Label (Optional)',
+                hintText: 'e.g. Forehead Scan #1',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppRadii.medium),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12, vertical: AppSpacing.s12),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(null),
+            child: Text(
+              'Cancel',
+              style: AppTextStyles.label.copyWith(color: AppColors.secondaryText),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.onPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadii.small),
+              ),
+            ),
+            onPressed: () => Navigator.of(dialogCtx).pop(controller.text),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    ).then((newLabel) {
+      if (newLabel != null && mounted) {
+        ref.read(historyProvider.notifier).updateLabel(scanId, newLabel);
       }
     });
   }
@@ -183,6 +288,73 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 ],
               ),
               const SizedBox(height: AppSpacing.s16),
+
+              // Auto ID and Optional Label Pill
+              Consumer(
+                builder: (context, ref, _) {
+                  final scanId = ref.watch(currentScanIdProvider);
+                  final allRecords = ref.watch(filteredHistoryRecordsProvider);
+                  final currentRecord = allRecords.cast<ScanRecord?>().firstWhere(
+                    (r) => r?.id == scanId,
+                    orElse: () => null,
+                  );
+
+                  if (scanId == null) return const SizedBox.shrink();
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.s12),
+                    child: Material(
+                      color: AppColors.surface,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppRadii.medium),
+                        side: const BorderSide(color: AppColors.border),
+                      ),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(AppRadii.medium),
+                        onTap: () => _showEditLabelDialog(scanId, currentRecord?.label),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12, vertical: AppSpacing.s8),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.inventory_2_outlined, size: 16.0, color: AppColors.primary),
+                              const SizedBox(width: AppSpacing.s8),
+                              Text(
+                                scanId,
+                                style: AppTextStyles.label.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              if (currentRecord?.label != null && currentRecord!.label!.isNotEmpty) ...[
+                                const SizedBox(width: AppSpacing.s6),
+                                Text(
+                                  '•  ${currentRecord.label}',
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: AppColors.secondaryText,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ] else ...[
+                                const SizedBox(width: AppSpacing.s6),
+                                Text(
+                                  '(Add label)',
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: AppColors.secondaryText,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ],
+                              const SizedBox(width: AppSpacing.s8),
+                              const Icon(Icons.edit_note_rounded, size: 16.0, color: AppColors.secondaryText),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
 
               // Prediction Result Card
               Container(

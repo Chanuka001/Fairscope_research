@@ -122,6 +122,19 @@ class AnalysisNotifier extends Notifier<AnalysisState> {
     }
   }
 
+  void setResult({
+    required Prediction prediction,
+    double? preprocessMs,
+    double? inferenceMs,
+  }) {
+    state = AnalysisState(
+      isLoading: false,
+      prediction: prediction,
+      preprocessMs: preprocessMs,
+      inferenceMs: inferenceMs,
+    );
+  }
+
   void reset() {
     state = const AnalysisState();
   }
