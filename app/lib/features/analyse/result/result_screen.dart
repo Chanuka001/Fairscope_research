@@ -89,22 +89,26 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                         ),
                       )
                     : Image.asset(
-                        'assets/images/avatas/user_avatar_type_II.png',
+                        'assets/images/avatas/result-screen img.png',
                         fit: BoxFit.contain,
-                        errorBuilder: (_, _, _) => const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.face_rounded,
-                              size: 72.0,
-                              color: AppColors.primary,
-                            ),
-                            SizedBox(height: AppSpacing.s8),
-                            Text(
-                              'Captured Face Region (OV2640)',
-                              style: AppTextStyles.caption,
-                            ),
-                          ],
+                        errorBuilder: (_, _, _) => Image.asset(
+                          'assets/images/avatas/user_avatar_type_II.png',
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, _, _) => const Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.face_rounded,
+                                size: 72.0,
+                                color: AppColors.primary,
+                              ),
+                              SizedBox(height: AppSpacing.s8),
+                              Text(
+                                'Captured Face Region (OV2640)',
+                                style: AppTextStyles.caption,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
               ),
