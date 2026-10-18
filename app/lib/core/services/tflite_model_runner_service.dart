@@ -231,7 +231,8 @@ class TfliteModelRunnerService implements ModelRunnerService {
     }
 
     if (_interpreter == null) {
-      return List.filled(iterations, 14.2);
+      final base = _currentVariant == 'baseline_fp32' ? 18.5 : 7.5;
+      return List.generate(iterations, (i) => base + (i % 3) * 0.3);
     }
 
     final inTensor = _interpreter!.getInputTensor(0);

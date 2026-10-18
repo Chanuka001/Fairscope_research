@@ -9,5 +9,6 @@ export 'mock_probe_service.dart';
 export 'model_runner_service.dart';
 export 'probe_service.dart';
 export 'results_repository.dart';
+export 'tflite_benchmark_service.dart';
 export 'tflite_model_runner_service.dart';
 

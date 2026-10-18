@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/navigation/step_indicator.dart';
 import '../../../../core/state/nav_state.dart';
+import '../../../../core/state/probe_state.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -20,6 +21,7 @@ class _ExplainScreenState extends ConsumerState<ExplainScreen> {
   @override
   Widget build(BuildContext context) {
     final navController = ref.read(navigationControllerProvider);
+    final selectedCapture = ref.watch(selectedCaptureProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -63,15 +65,25 @@ class _ExplainScreenState extends ConsumerState<ExplainScreen> {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    Image.asset(
-                      'assets/images/avatas/user_avatar_type_II.png',
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, _, _) => const Icon(
-                        Icons.face_rounded,
-                        size: 96.0,
-                        color: AppColors.primary,
-                      ),
-                    ),
+                    selectedCapture != null && selectedCapture.imageBytes.isNotEmpty
+                        ? Image.memory(
+                            selectedCapture.imageBytes,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, _, _) => const Icon(
+                              Icons.face_rounded,
+                              size: 96.0,
+                              color: AppColors.primary,
+                            ),
+                          )
+                        : Image.asset(
+                            'assets/images/avatas/user_avatar_type_II.png',
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, _, _) => const Icon(
+                              Icons.face_rounded,
+                              size: 96.0,
+                              color: AppColors.primary,
+                            ),
+                          ),
                     // Realistic Grad-CAM saliency heat overlay
                     Opacity(
                       opacity: _heatmapOpacity,
