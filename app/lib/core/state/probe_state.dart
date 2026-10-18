@@ -4,12 +4,26 @@ import '../models/capture.dart';
 import '../models/scan_record.dart';
 import '../services/capture_store.dart';
 import '../services/in_memory_capture_store.dart';
+import '../services/http_probe_service.dart';
 import '../services/mock_probe_service.dart';
 import '../services/probe_service.dart';
 
-/// Provider for the singleton [ProbeService] instance (defaults to [MockProbeService]).
+/// Notifier controlling whether the app uses Mock Hardware or Real ESP32-CAM HTTP probe.
+class MockProbeNotifier extends Notifier<bool> {
+  @override
+  bool build() => true;
+
+  void toggle() => state = !state;
+  void setMock(bool isMock) => state = isMock;
+}
+
+final isMockProbeProvider =
+    NotifierProvider<MockProbeNotifier, bool>(MockProbeNotifier.new);
+
+/// Provider for the singleton [ProbeService] instance (Mock or real HTTP probe).
 final probeServiceProvider = Provider<ProbeService>((ref) {
-  final service = MockProbeService();
+  final isMock = ref.watch(isMockProbeProvider);
+  final service = isMock ? MockProbeService() : HttpProbeService();
   ref.onDispose(() => service.dispose());
   return service;
 });

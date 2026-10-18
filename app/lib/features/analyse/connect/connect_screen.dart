@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/config/probe_config.dart';
 import '../../../../core/models/capture.dart';
 import '../../../../core/navigation/step_indicator.dart';
+import '../../../../core/services/http_probe_service.dart';
 import '../../../../core/services/probe_service.dart';
 import '../../../../core/state/nav_state.dart';
 import '../../../../core/state/probe_state.dart';
@@ -36,6 +37,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     final navController = ref.read(navigationControllerProvider);
     final probeStatus = ref.watch(probeStatusProvider);
     final captures = ref.watch(pendingCapturesProvider);
+    final isMockMode = ref.watch(isMockProbeProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -74,8 +76,15 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
               _buildProbeStatusPill(context, probeStatus),
               const SizedBox(height: AppSpacing.s12),
 
-              // Mock Hardware Simulate Button Control (Per Section 5 & 11)
-              _buildSimulateButton(probeStatus),
+              // Probe mode switcher (Mock hardware vs Real ESP32 probe)
+              _buildModeSwitcher(isMockMode),
+              const SizedBox(height: AppSpacing.s12),
+
+              // Mock Hardware Simulate Button Control or Real Probe Control
+              if (isMockMode)
+                _buildSimulateButton(probeStatus)
+              else
+                _buildRealProbeControl(probeStatus),
               const SizedBox(height: AppSpacing.s20),
 
               // Section title
@@ -335,6 +344,115 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
           }
         }
       },
+    );
+  }
+
+  /// Toggle switcher between Mock Hardware and Physical ESP32-CAM probe
+  Widget _buildModeSwitcher(bool isMockMode) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12, vertical: AppSpacing.s8),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadii.medium),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(
+                isMockMode ? Icons.science_outlined : Icons.wifi_rounded,
+                size: 16.0,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: AppSpacing.s8),
+              Text(
+                isMockMode ? 'Source: Mock Hardware' : 'Source: ESP32-CAM Wi-Fi',
+                style: AppTextStyles.caption.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.text,
+                ),
+              ),
+            ],
+          ),
+          InkWell(
+            onTap: () {
+              ref.read(isMockProbeProvider.notifier).toggle();
+              ref.read(probeStatusProvider.notifier).connect();
+            },
+            borderRadius: BorderRadius.circular(AppRadii.small),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s8, vertical: 4.0),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant,
+                borderRadius: BorderRadius.circular(AppRadii.small),
+              ),
+              child: Text(
+                isMockMode ? 'Switch to Real Probe' : 'Switch to Mock',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 11.5,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Real ESP32-CAM capture request button
+  Widget _buildRealProbeControl(ProbeConnectionStatus status) {
+    final isConnected = status == ProbeConnectionStatus.connected;
+
+    return OutlinedButton.icon(
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(44.0),
+        backgroundColor: isConnected
+            ? AppColors.primary.withValues(alpha: 0.05)
+            : AppColors.surfaceVariant.withValues(alpha: 0.3),
+        foregroundColor: isConnected ? AppColors.primary : AppColors.secondaryText,
+        side: BorderSide(
+          color: isConnected
+              ? AppColors.primary.withValues(alpha: 0.4)
+              : AppColors.border,
+          style: BorderStyle.solid,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadii.medium),
+        ),
+      ),
+      icon: const Icon(Icons.download_rounded, size: 18.0),
+      label: Text(
+        'Request capture from probe [ESP32-CAM]',
+        style: AppTextStyles.label.copyWith(
+          fontWeight: FontWeight.w600,
+          color: isConnected ? AppColors.primary : AppColors.secondaryText,
+        ),
+      ),
+      onPressed: isConnected
+          ? () async {
+              try {
+                final probe = ref.read(probeServiceProvider);
+                if (probe is HttpProbeService) {
+                  final cap = await probe.fetchLatestCapture();
+                  if (cap == null && mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('No new capture returned by ESP32 probe.')),
+                    );
+                  }
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Probe error: $e')),
+                  );
+                }
+              }
+            }
+          : null,
     );
   }
 
