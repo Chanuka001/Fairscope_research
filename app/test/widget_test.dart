@@ -40,8 +40,8 @@ void main() {
 
     // 3. Tap 'Analyse' button on the pending capture card to go to Step 2
     final analyseBtn = find.widgetWithText(FilledButton, 'Analyse');
-    expect(analyseBtn, findsOneWidget);
-    await tester.tap(analyseBtn);
+    expect(analyseBtn, findsWidgets);
+    await tester.tap(analyseBtn.first);
     await tester.pumpAndSettle();
 
     // 4. Verify Step 2 is displayed

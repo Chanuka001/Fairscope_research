@@ -49,6 +49,7 @@ class HistoryScreen extends ConsumerWidget {
                     id: 'FS-0003',
                     condition: 'Normal skin',
                     timestamp: '16 Sep 2026 • 14:32',
+                    avatarAsset: 'assets/images/avatas/user_avatar_type_II.png',
                     onTap: () {
                       // Opens the scan result in the 4-step flow
                       navController.setTab(0);
@@ -60,6 +61,7 @@ class HistoryScreen extends ConsumerWidget {
                     id: 'FS-0002',
                     condition: 'Dry skin',
                     timestamp: '14 Sep 2026 • 11:20',
+                    avatarAsset: 'assets/images/avatas/user_avatar_type_IV.png',
                     onTap: () {
                       navController.setTab(0);
                       navController.goToStep(2);
@@ -70,6 +72,7 @@ class HistoryScreen extends ConsumerWidget {
                     id: 'FS-0001',
                     condition: 'Oily skin',
                     timestamp: '12 Sep 2026 • 09:15',
+                    avatarAsset: 'assets/images/avatas/user_avatar_type_V.png',
                     onTap: () {
                       navController.setTab(0);
                       navController.goToStep(2);
@@ -96,6 +99,7 @@ class HistoryScreen extends ConsumerWidget {
     required String id,
     required String condition,
     required String timestamp,
+    required String avatarAsset,
     required VoidCallback onTap,
   }) {
     return Material(
@@ -117,9 +121,14 @@ class HistoryScreen extends ConsumerWidget {
             color: AppColors.surfaceVariant,
             borderRadius: AppRadii.brMedium,
           ),
-          child: const Icon(
-            Icons.face_rounded,
-            color: AppColors.primary,
+          clipBehavior: Clip.antiAlias,
+          child: Image.asset(
+            avatarAsset,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => const Icon(
+              Icons.face_rounded,
+              color: AppColors.primary,
+            ),
           ),
         ),
         title: Row(

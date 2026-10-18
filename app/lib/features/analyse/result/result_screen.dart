@@ -49,20 +49,25 @@ class ResultScreen extends ConsumerWidget {
                   borderRadius: AppRadii.brLarge,
                   border: Border.all(color: AppColors.border),
                 ),
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.face_rounded,
-                      size: 72.0,
-                      color: AppColors.primary,
-                    ),
-                    SizedBox(height: AppSpacing.s8),
-                    Text(
-                      'Captured Face Region (OV2640)',
-                      style: AppTextStyles.caption,
-                    ),
-                  ],
+                clipBehavior: Clip.antiAlias,
+                child: Image.asset(
+                  'assets/images/avatas/user_avatar_type_II.png',
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, _, _) => const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.face_rounded,
+                        size: 72.0,
+                        color: AppColors.primary,
+                      ),
+                      SizedBox(height: AppSpacing.s8),
+                      Text(
+                        'Captured Face Region (OV2640)',
+                        style: AppTextStyles.caption,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpacing.s16),
