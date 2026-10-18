@@ -1,24 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/config/probe_config.dart';
+import '../../../../core/models/capture.dart';
 import '../../../../core/navigation/step_indicator.dart';
+import '../../../../core/services/probe_service.dart';
 import '../../../../core/state/nav_state.dart';
+import '../../../../core/state/probe_state.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
 /// Step 1: Connect probe and view pending captures (Owned by Member B + C)
-class ConnectScreen extends ConsumerWidget {
+class ConnectScreen extends ConsumerStatefulWidget {
   const ConnectScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ConnectScreen> createState() => _ConnectScreenState();
+}
+
+class _ConnectScreenState extends ConsumerState<ConnectScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Auto-connect probe on initial load per Section 2 flow
+    Future.microtask(() {
+      final status = ref.read(probeStatusProvider);
+      if (status == ProbeConnectionStatus.off) {
+        ref.read(probeStatusProvider.notifier).connect();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final navController = ref.read(navigationControllerProvider);
+    final probeStatus = ref.watch(probeStatusProvider);
+    final captures = ref.watch(pendingCapturesProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding, vertical: AppSpacing.s12),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.screenPadding,
+            vertical: AppSpacing.s12,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -44,87 +70,12 @@ class ConnectScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.s16),
 
-              // Probe connected status pill (Compact, elegant pill matching Screen 3)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16, vertical: AppSpacing.s12),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryContainer.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(AppRadii.large),
-                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 32.0,
-                      height: 32.0,
-                      padding: const EdgeInsets.all(4.0),
-                      decoration: const BoxDecoration(
-                        color: AppColors.surface,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Image.asset(
-                        'assets/images/sensor.png',
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, _, _) => const Icon(
-                          Icons.sensors_rounded,
-                          color: AppColors.primary,
-                          size: 18.0,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.s12),
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 8.0,
-                            height: 8.0,
-                            decoration: const BoxDecoration(
-                              color: AppColors.success,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.s8),
-                          Flexible(
-                            child: Text(
-                              'Probe connected',
-                              style: AppTextStyles.label.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.onPrimaryContainer,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Signal and Battery
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.signal_cellular_alt_rounded,
-                          size: 16.0,
-                          color: AppColors.primary,
-                        ),
-                        const SizedBox(width: AppSpacing.s4),
-                        const Icon(
-                          Icons.battery_5_bar_rounded,
-                          size: 16.0,
-                          color: AppColors.primary,
-                        ),
-                        const SizedBox(width: 4.0),
-                        Text(
-                          '78%',
-                          style: AppTextStyles.caption.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.onPrimaryContainer,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+              // Probe connected status pill (Compact, elegant pill with animated state)
+              _buildProbeStatusPill(context, probeStatus),
+              const SizedBox(height: AppSpacing.s12),
+
+              // Mock Hardware Simulate Button Control (Per Section 5 & 11)
+              _buildSimulateButton(probeStatus),
               const SizedBox(height: AppSpacing.s20),
 
               // Section title
@@ -145,7 +96,7 @@ class ConnectScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(AppRadii.small),
                     ),
                     child: Text(
-                      '2 of 5 stored',
+                      '${captures.length} of ${ProbeConfig.maxPendingCaptures} stored',
                       style: AppTextStyles.caption.copyWith(
                         fontWeight: FontWeight.w600,
                         color: AppColors.secondaryText,
@@ -156,32 +107,37 @@ class ConnectScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.s12),
 
-              // Capture Card 1: Avatar Type II (FairScope UI Showcase Screen 3)
-              _buildCaptureCard(
-                context: context,
-                avatarAsset: 'assets/images/avatas/user_avatar_type_II.png',
-                timestamp: '16 Sep 2026 • 14:32',
-                isNew: true,
-                moisture: '42%',
-                temp: '32.4°C',
-                colorIdx: '68',
-                onAnalyse: () => navController.goToStep(2),
-              ),
-              const SizedBox(height: AppSpacing.s12),
+              // Empty state or list of pending capture cards
+              if (captures.isEmpty)
+                _buildEmptyCapturesState(probeStatus)
+              else
+                ...captures.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final capture = entry.value;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.s12),
+                    child: _buildCaptureCard(
+                      context: context,
+                      capture: capture,
+                      isNew: index == 0,
+                      onAnalyse: () {
+                        ref.read(selectedCaptureProvider.notifier).select(capture);
+                        navController.goToStep(2);
+                      },
+                      onDelete: () {
+                        ref.read(pendingCapturesProvider.notifier).removeCapture(capture.id);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Capture ${capture.id} deleted'),
+                            duration: const Duration(seconds: 1),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                }),
 
-              // Capture Card 2: Avatar Type IV
-              _buildCaptureCard(
-                context: context,
-                avatarAsset: 'assets/images/avatas/user_avatar_type_IV.png',
-                timestamp: '16 Sep 2026 • 13:47',
-                isNew: false,
-                moisture: '56%',
-                temp: '33.1°C',
-                colorIdx: '72',
-                onAnalyse: () => navController.goToStep(2),
-              ),
-
-              const SizedBox(height: AppSpacing.s20),
+              const SizedBox(height: AppSpacing.s16),
               Center(
                 child: Text(
                   'Up to 5 captures are kept. Older ones are removed.',
@@ -192,6 +148,7 @@ class ConnectScreen extends ConsumerWidget {
                   textAlign: TextAlign.center,
                 ),
               ),
+              const SizedBox(height: AppSpacing.s24),
             ],
           ),
         ),
@@ -199,16 +156,230 @@ class ConnectScreen extends ConsumerWidget {
     );
   }
 
+  /// Probe hardware connection pill
+  Widget _buildProbeStatusPill(BuildContext context, ProbeConnectionStatus status) {
+    Color bg;
+    Color border;
+    Color dotColor;
+    String statusText;
+    late final Widget trailing;
+
+    switch (status) {
+      case ProbeConnectionStatus.connected:
+        bg = AppColors.primaryContainer.withValues(alpha: 0.6);
+        border = AppColors.primary.withValues(alpha: 0.25);
+        dotColor = AppColors.success;
+        statusText = 'Probe connected';
+        trailing = Row(
+          children: [
+            const Icon(Icons.signal_cellular_alt_rounded, size: 16.0, color: AppColors.primary),
+            const SizedBox(width: AppSpacing.s4),
+            const Icon(Icons.battery_5_bar_rounded, size: 16.0, color: AppColors.primary),
+            const SizedBox(width: 4.0),
+            Text(
+              '82%',
+              style: AppTextStyles.caption.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppColors.onPrimaryContainer,
+              ),
+            ),
+          ],
+        );
+        break;
+      case ProbeConnectionStatus.connecting:
+        bg = AppColors.warningContainer.withValues(alpha: 0.5);
+        border = AppColors.warning.withValues(alpha: 0.4);
+        dotColor = AppColors.warning;
+        statusText = 'Connecting to probe...';
+        trailing = const SizedBox(
+          width: 14.0,
+          height: 14.0,
+          child: CircularProgressIndicator(strokeWidth: 2.0, color: AppColors.warning),
+        );
+        break;
+      case ProbeConnectionStatus.off:
+      case ProbeConnectionStatus.lost:
+      case ProbeConnectionStatus.error:
+        bg = AppColors.surfaceVariant;
+        border = AppColors.border;
+        dotColor = AppColors.error;
+        statusText = status == ProbeConnectionStatus.off
+            ? 'Probe disconnected'
+            : 'Probe connection lost';
+        trailing = TextButton(
+          onPressed: () => ref.read(probeStatusProvider.notifier).connect(),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: Text(
+            'Connect',
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        );
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s16, vertical: AppSpacing.s12),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(AppRadii.large),
+        border: Border.all(color: border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 32.0,
+            height: 32.0,
+            padding: const EdgeInsets.all(4.0),
+            decoration: const BoxDecoration(
+              color: AppColors.surface,
+              shape: BoxShape.circle,
+            ),
+            child: Image.asset(
+              'assets/images/sensor.png',
+              fit: BoxFit.contain,
+              errorBuilder: (_, _, _) => const Icon(
+                Icons.sensors_rounded,
+                color: AppColors.primary,
+                size: 18.0,
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.s12),
+          Expanded(
+            child: Row(
+              children: [
+                Container(
+                  width: 8.0,
+                  height: 8.0,
+                  decoration: BoxDecoration(
+                    color: dotColor,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.s8),
+                Flexible(
+                  child: Text(
+                    statusText,
+                    style: AppTextStyles.label.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.text,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          trailing,
+        ],
+      ),
+    );
+  }
+
+  /// Simulate Device Button control for mock hardware mode
+  Widget _buildSimulateButton(ProbeConnectionStatus status) {
+    final isConnected = status == ProbeConnectionStatus.connected;
+
+    return OutlinedButton.icon(
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(44.0),
+        backgroundColor: isConnected
+            ? AppColors.primary.withValues(alpha: 0.05)
+            : AppColors.surfaceVariant.withValues(alpha: 0.3),
+        foregroundColor: isConnected ? AppColors.primary : AppColors.secondaryText,
+        side: BorderSide(
+          color: isConnected
+              ? AppColors.primary.withValues(alpha: 0.4)
+              : AppColors.border,
+          style: BorderStyle.solid,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadii.medium),
+        ),
+      ),
+      icon: const Icon(Icons.touch_app_rounded, size: 18.0),
+      label: Text(
+        'Simulate device button [Mock hardware]',
+        style: AppTextStyles.label.copyWith(
+          fontWeight: FontWeight.w600,
+          color: isConnected ? AppColors.primary : AppColors.secondaryText,
+        ),
+      ),
+      onPressed: () async {
+        try {
+          await ref.read(pendingCapturesProvider.notifier).simulateDeviceButton();
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Notice: $e')),
+            );
+          }
+        }
+      },
+    );
+  }
+
+  /// Empty state when no captures are waiting
+  Widget _buildEmptyCapturesState(ProbeConnectionStatus status) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 36.0, horizontal: AppSpacing.s20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadii.large),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 56.0,
+            height: 56.0,
+            decoration: BoxDecoration(
+              color: AppColors.surfaceVariant,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.camera_alt_outlined,
+              size: 28.0,
+              color: AppColors.secondaryText,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.s12),
+          Text(
+            'No pending captures',
+            style: AppTextStyles.title.copyWith(fontSize: 16.0, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 4.0),
+          Text(
+            status == ProbeConnectionStatus.connected
+                ? 'Press the physical probe button or click "Simulate device button" above.'
+                : 'Connect the probe to receive sensor captures.',
+            style: AppTextStyles.caption.copyWith(color: AppColors.secondaryText),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCaptureCard({
     required BuildContext context,
-    required String avatarAsset,
-    required String timestamp,
+    required Capture capture,
     required bool isNew,
-    required String moisture,
-    required String temp,
-    required String colorIdx,
     required VoidCallback onAnalyse,
+    required VoidCallback onDelete,
   }) {
+    final timestampStr =
+        '${capture.receivedTime.day} ${_monthName(capture.receivedTime.month)} ${capture.receivedTime.year} • '
+        '${capture.receivedTime.hour.toString().padLeft(2, '0')}:${capture.receivedTime.minute.toString().padLeft(2, '0')}';
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
@@ -233,15 +404,21 @@ class ConnectScreen extends ConsumerWidget {
                   border: Border.all(color: AppColors.border),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: Image.asset(
-                  avatarAsset,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => const Icon(
-                    Icons.face_rounded,
-                    size: 32.0,
-                    color: AppColors.primary,
-                  ),
-                ),
+                child: capture.imageBytes.isNotEmpty
+                    ? Image.memory(
+                        capture.imageBytes,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => const Icon(
+                          Icons.face_rounded,
+                          size: 32.0,
+                          color: AppColors.primary,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.face_rounded,
+                        size: 32.0,
+                        color: AppColors.primary,
+                      ),
               ),
               const SizedBox(width: AppSpacing.s12),
               Expanded(
@@ -271,7 +448,7 @@ class ConnectScreen extends ConsumerWidget {
                         ],
                         Flexible(
                           child: Text(
-                            timestamp,
+                            timestampStr,
                             style: AppTextStyles.caption.copyWith(
                               color: AppColors.secondaryText,
                             ),
@@ -282,7 +459,7 @@ class ConnectScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 6.0),
                     Text(
-                      'OV2640 Image • 640×480 JPEG',
+                      'OV2640 Image • ${capture.formattedImageSize}',
                       style: AppTextStyles.body.copyWith(
                         fontSize: 14.0,
                         fontWeight: FontWeight.w600,
@@ -302,7 +479,7 @@ class ConnectScreen extends ConsumerWidget {
               _buildSensorPill(
                 icon: Icons.water_drop_rounded,
                 label: 'Moisture',
-                value: moisture,
+                value: '${capture.sensorReading.moisture.toStringAsFixed(1)}%',
                 bgColor: AppColors.sensorMoistureBg,
                 iconColor: AppColors.sensorMoistureIcon,
               ),
@@ -310,7 +487,7 @@ class ConnectScreen extends ConsumerWidget {
               _buildSensorPill(
                 icon: Icons.device_thermostat_rounded,
                 label: 'Temperature',
-                value: temp,
+                value: '${capture.sensorReading.temperature.toStringAsFixed(1)}°C',
                 bgColor: AppColors.sensorTempBg,
                 iconColor: AppColors.sensorTempIcon,
               ),
@@ -318,7 +495,7 @@ class ConnectScreen extends ConsumerWidget {
               _buildSensorPill(
                 icon: Icons.palette_outlined,
                 label: 'Color Index',
-                value: colorIdx,
+                value: '${capture.sensorReading.colorIndex}',
                 bgColor: AppColors.sensorColorBg,
                 iconColor: AppColors.sensorColorIcon,
               ),
@@ -328,7 +505,7 @@ class ConnectScreen extends ConsumerWidget {
           const Divider(height: 1.0, color: AppColors.border),
           const SizedBox(height: AppSpacing.s12),
 
-          // Action buttons: Eye Icon + Trash Icon + Analyse Button
+          // Action buttons: Eye Icon (Raw data) + Trash Icon (Delete) + Analyse Button
           Row(
             children: [
               // Eye Icon Button (View raw data)
@@ -336,10 +513,8 @@ class ConnectScreen extends ConsumerWidget {
                 onTap: () {
                   _showRawDataModal(
                     context: context,
-                    timestamp: timestamp,
-                    moisture: moisture,
-                    temp: temp,
-                    colorIdx: colorIdx,
+                    capture: capture,
+                    formattedTime: timestampStr,
                   );
                 },
                 borderRadius: BorderRadius.circular(AppRadii.medium),
@@ -364,14 +539,7 @@ class ConnectScreen extends ConsumerWidget {
 
               // Delete Icon Button
               InkWell(
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Capture deleted'),
-                      duration: Duration(seconds: 1),
-                    ),
-                  );
-                },
+                onTap: onDelete,
                 borderRadius: BorderRadius.circular(AppRadii.medium),
                 child: Container(
                   width: 44.0,
@@ -479,10 +647,8 @@ class ConnectScreen extends ConsumerWidget {
 
   void _showRawDataModal({
     required BuildContext context,
-    required String timestamp,
-    required String moisture,
-    required String temp,
-    required String colorIdx,
+    required Capture capture,
+    required String formattedTime,
   }) {
     showModalBottomSheet(
       context: context,
@@ -508,15 +674,25 @@ class ConnectScreen extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.s12),
+              _buildRawDataRow('Capture ID', capture.id),
               _buildRawDataRow('Probe Camera', 'ESP32-CAM (OV2640)'),
               _buildRawDataRow('Resolution', '640 × 480 JPEG'),
-              _buildRawDataRow('Payload Size', '48.2 KB'),
-              _buildRawDataRow('Captured At', timestamp),
-              _buildRawDataRow('Transfer Latency', '142 ms'),
+              _buildRawDataRow('Payload Size', capture.formattedImageSize),
+              _buildRawDataRow('Received At', formattedTime),
+              _buildRawDataRow('Transfer Latency', '${capture.transferMs ?? 0} ms'),
               const Divider(height: 24.0, color: AppColors.border),
-              _buildRawDataRow('Moisture Sensor', moisture),
-              _buildRawDataRow('Temperature', temp),
-              _buildRawDataRow('Spectral Index', colorIdx),
+              _buildRawDataRow(
+                'Moisture Sensor',
+                '${capture.sensorReading.moisture.toStringAsFixed(1)}%',
+              ),
+              _buildRawDataRow(
+                'Temperature',
+                '${capture.sensorReading.temperature.toStringAsFixed(1)} °C',
+              ),
+              _buildRawDataRow(
+                'Spectral Index',
+                'Fitzpatrick Type ${capture.sensorReading.colorIndex}',
+              ),
               const SizedBox(height: AppSpacing.s16),
             ],
           ),
@@ -539,5 +715,14 @@ class ConnectScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  static String _monthName(int month) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    if (month >= 1 && month <= 12) return months[month - 1];
+    return '';
   }
 }

@@ -67,10 +67,20 @@ void main() {
       findsOneWidget,
     );
 
-    // 6. Tap 'Analyse' button on the pending capture card to go to Step 2
+    // 6. Simulate device button press to add a pending capture card
+    final simulateBtn = find.text('Simulate device button [Mock hardware]');
+    expect(simulateBtn, findsOneWidget);
+    await tester.tap(simulateBtn);
+    await tester.pumpAndSettle();
+
+    // Verify card is added
+    expect(find.text('1 of 5 stored'), findsOneWidget);
+    expect(find.text('NEW'), findsOneWidget);
+
+    // Tap 'Analyse' button on the pending capture card to go to Step 2
     final analyseBtn = find.widgetWithText(FilledButton, 'Analyse');
-    expect(analyseBtn, findsWidgets);
-    await tester.tap(analyseBtn.first);
+    expect(analyseBtn, findsOneWidget);
+    await tester.tap(analyseBtn);
     await tester.pumpAndSettle();
 
     // 7. Verify Step 2 is displayed
