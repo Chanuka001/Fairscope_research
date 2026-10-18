@@ -1,6 +1,6 @@
 # FairScope
 
-> A Deployment-Readiness System for Multimodal AI-Based Facial Skin Condition Analysis, with an IoT Sensor Probe
+**A Deployment-Readiness System for Multimodal AI-Based Facial Skin Condition Analysis, with an IoT Sensor Probe**
 
 Final-year research project, SLIIT | Project ID: J26-IT-371
 
@@ -15,7 +15,7 @@ AI-based facial skin analysis systems report high accuracy in controlled researc
 - **No explainability:** predictions users and clinicians cannot inspect
 - **Missing physical signals:** images alone cannot capture properties like hydration
 
-**FairScope** addresses these together. It combines a camera image and readings from a low-cost wireless sensor probe, fuses them in one model, compresses that model to run on a phone, and makes the trade-offs (rare-class accuracy, compression cost, explainability, fairness) visible and testable.
+**FairScope** addresses these together. It combines an image from a low-cost wireless probe (ESP32-CAM) and the probe's skin sensor readings, fuses them in one model, compresses that model to run on a phone, and makes the trade-offs (rare-class accuracy, compression cost, explainability, fairness) visible and testable.
 
 ## 2. Objectives
 
@@ -28,23 +28,24 @@ Build and demonstrate a working multimodal AI-and-IoT system that shows deployme
 
 ## 3. System at a glance
 
-```text
- ┌──────────────────────┐
- │  IoT sensor probe    │  ESP32 + moisture + spectral/color sensor
- │  (firmware/)         │
- └─────────┬────────────┘
-           │ BLE / Wi-Fi
-           ▼
+```
+ ┌──────────────────────────────┐
+ │  Wireless probe (firmware/)  │  ESP32-CAM + OV2640 camera
+ │                              │  + moisture + spectral/color sensor
+ └─────────────┬────────────────┘
+               │ Wi-Fi: JPEG image + sensor readings
+               ▼
  ┌──────────────────────────────────────────────┐
  │  Phone app (app/)                            │
- │  camera + sensor input                       │
+ │  receives image and sensor readings          │
+ │  → preprocessing                             │
  │  → compressed fusion model (on-device)       │
  │  → scan result, confidence, Grad-CAM         │
- │  → research panels (accuracy, compression,   │
- │     fairness)                                │
- └─────────┬────────────────────────────────────┘
-           │ exported results (JSON)
-           ▼
+ │  → research panels (compression comparison,  │
+ │     explainability, fairness)                │
+ └─────────────┬────────────────────────────────┘
+               │ exported results (JSON)
+               ▼
  ┌──────────────────────┐
  │  Dashboard           │  browser view for larger screens
  │  (dashboard/)        │
@@ -54,20 +55,30 @@ Build and demonstrate a working multimodal AI-and-IoT system that shows deployme
           produce the model files and the result files above.
 ```
 
+The camera is on the probe, not on the phone. The phone does not use its own camera. The model runs on the phone, not on the probe.
+
+**App flow** (two tabs: Analyse and History):
+
+```
+Connect probe → capture cards (delete / analyse) → result summary → explanation (Grad-CAM) → performance dashboard
+```
+
+Only analysed captures are saved to History. The performance dashboard is a research view and is not part of the real-world use of the app. Details are in `app/README.md`.
+
 ## 4. Components and team
 
 | Member | Area | Responsibilities | Main folders |
-| --- | --- | --- | --- |
-| **A** | AI: image branch and rare-class detection | Train and fine-tune the image classifier, handle class imbalance (focal loss, resampling), per-class accuracy, co-design the fusion layer | `models/image_branch/`, `app/lib/features/scan/` |
-| **B** | IoT: sensor probe | Build the probe (ESP32, sensors, BLE/Wi-Fi), train the sensor model, stream data to the phone, co-design the fusion layer | `firmware/`, `models/sensor_branch/`, `app/lib/features/sensor/` |
-| **C** | Deployment: compression and on-phone optimization | Quantization and pruning, export to a mobile runtime (TensorFlow Lite), benchmark latency and throughput on a real phone, own the app shell and model inference call | `models/compressed/`, `benchmarks/`, `app/lib/core/`, `app/lib/features/comparison/` |
-| **D** | AI: explainability and fairness | Grad-CAM and SHAP / feature attribution, cross-dataset generalization, performance by Fitzpatrick type and class rarity, consent and onboarding flow | `models/explainability/`, `results/`, `app/lib/features/explain/`, `app/lib/features/onboarding/` |
+|---|---|---|---|
+| **A** | AI: image branch and rare-class detection | Train and fine-tune the image classifier (tested on OV2640 probe images), handle class imbalance (focal loss, resampling), per-class accuracy, co-design the fusion layer | `models/image_branch/`, result widgets in `app/lib/features/analyse/result/` |
+| **B** | IoT: wireless probe | Build the probe (ESP32-CAM with OV2640 camera, moisture and color sensors, Wi-Fi), serve images and sensor readings to the phone, train the sensor model, co-design the fusion layer | `firmware/`, `models/sensor_branch/`, probe widgets in `app/lib/features/analyse/connect/` |
+| **C** | Deployment: compression and on-phone optimization | Quantization and pruning, export to a mobile runtime (TensorFlow Lite), benchmark latency and throughput on a real phone, own the app shell, the probe service interface, image preprocessing and the model inference call | `models/compressed/`, `benchmarks/`, `app/lib/core/`, `app/lib/features/analyse/performance/`, `app/lib/features/history/` |
+| **D** | AI: explainability and fairness | Grad-CAM and SHAP / feature attribution, cross-dataset generalization, performance by Fitzpatrick type and class rarity, consent and onboarding flow | `models/explainability/`, `results/`, `app/lib/features/analyse/explain/`, `app/lib/features/onboarding/` |
 
 The fusion model (`models/fusion/`) is co-owned by A and B, then handed to C for compression.
 
 ## 5. Repository structure
 
-```text
+```
 fairscope/
 ├── README.md                  # This file (project root guide)
 ├── .gitignore
@@ -89,10 +100,12 @@ fairscope/
 │   │   ├── main.dart
 │   │   ├── core/              # [C] Navigation, state, model interface, theme
 │   │   ├── features/
-│   │   │   ├── scan/          # [A] Camera capture, result, per-class panel
-│   │   │   ├── sensor/        # [B] Probe pairing, sensor capture, status panel
-│   │   │   ├── comparison/    # [C] Original vs compressed panel
-│   │   │   ├── explain/       # [D] Grad-CAM overlay, fairness-gap chart
+│   │   │   ├── analyse/       # 4-step flow
+│   │   │   │   ├── connect/   # [B + C] Probe status, capture cards
+│   │   │   │   ├── result/    # [A + C] Result summary
+│   │   │   │   ├── explain/   # [D] Grad-CAM explanation
+│   │   │   │   └── performance/ # [C] Performance dashboard (fp32 vs int8, accuracy, fairness)
+│   │   │   ├── history/       # [C] Analysed scans only
 │   │   │   └── onboarding/    # [D] Consent and onboarding
 │   │   └── shared/            # Reusable widgets and utilities
 │   ├── assets/models/         # .tflite files bundled in the app
@@ -165,19 +178,18 @@ Fairness results use Fitzpatrick type keys (I to VI) with and without sensor fus
 ## 8. Tech stack
 
 | Part | Technology |
-| --- | --- |
+|---|---|
 | Model training | Python, TensorFlow / Keras |
 | Compression and export | TensorFlow Lite (quantization, pruning) |
 | Explainability | Grad-CAM, SHAP |
-| Sensor probe | ESP32, BLE / Wi-Fi |
-| Phone app | Flutter, `tflite_flutter`, BLE package |
+| Wireless probe | ESP32-CAM (OV2640 camera), moisture and color sensors, Wi-Fi |
+| Phone app | Flutter, `tflite_flutter`, HTTP client (talks to the probe over Wi-Fi) |
 | Dashboard (optional) | Next.js |
 | Collaboration | Git and GitHub |
 
 ## 9. Getting started
 
 ### Models (Python)
-
 ```bash
 cd models
 python -m venv .venv
@@ -186,11 +198,9 @@ pip install -r requirements.txt
 ```
 
 ### Firmware (ESP32)
-
 See `firmware/README.md` for wiring, board setup and flashing.
 
 ### Phone app
-
 ```bash
 cd app
 flutter pub get
@@ -198,7 +208,6 @@ flutter run                      # Android phone connected with USB debugging
 ```
 
 ### Dashboard (optional)
-
 ```bash
 cd dashboard
 npm install
@@ -207,28 +216,27 @@ npm run dev
 
 ## 10. Evaluation and deliverables
 
-**Primary deliverable:** the FairScope system, a phone app paired with the IoT sensor probe.
+**Primary deliverable:** the FairScope system, a phone app paired with the wireless probe (ESP32-CAM and skin sensors).
 
 In a live panel evaluation, the system demonstrates:
 
-1. Touching the probe to the skin and taking a phone photo
+1. Touching the probe to the skin and capturing an image with the probe camera, which sends it to the phone
 2. Real-time fused image and sensor classification with confidence and Grad-CAM explanation
-3. Live comparison of the compressed vs full model running on the phone
+3. A performance dashboard with a live comparison of the compressed vs full model running on the phone
 4. Fairness-gap analysis across skin tones, with and without sensor fusion
 
 **Extra deliverable:** a browser dashboard that mirrors the app's research views for larger screens.
 
 ## 11. Git workflow
 
-1. **`main`:** Production/demo-ready branch. Used for supervisor reviews and milestone evaluations. Nobody pushes to `main` directly.
-2. **`develop`:** Primary integration branch. All ongoing feature branches are merged here first.
-3. **Feature branches:** Create a branch per task off `develop`: `type/area-short-description` (e.g., `feat/compression-quantization`, `feat/sensor-ble-pairing`, `fix/comparison-panel-crash`).
-4. **Pull requests:** Open PRs targeting the `develop` branch. At least one teammate reviews and approves before merging.
-5. **Releases to `main`:** Before milestone reviews, ensure all tests pass on `develop`, then merge `develop` into `main` with a release tag (e.g., `v1.0-milestone`).
-6. **Sync often:** Regularly pull updates from `develop` into your feature branch to avoid merge conflicts.
-7. **Code ownership:** Work within your assigned subsystem folders. For changes in another member's area, consult them or open a PR for review.
+1. `main` always works and is demo-ready. Nobody pushes to it directly.
+2. Create a branch per task: `type/area-short-description` (for example `feat/compression-quantization`, `feat/sensor-ble-pairing`, `fix/comparison-panel-crash`).
+3. Commit small and often with clear messages.
+4. Open a pull request into `main`; at least one other member reviews it.
+5. Pull from `main` before starting new work.
+6. Edit files in your own folders. For changes in someone else's area, ask them or open a PR for their review.
 
-**Large files:** Do not commit datasets or heavy model weights. Use Git LFS or external releases for large files. Never commit secrets, passwords, or personal test photos.
+**Large files:** do not commit datasets. Use Git LFS or GitHub Releases for large model files. Never commit passwords, API keys, or personal images.
 
 ## 12. Ethics
 
@@ -240,9 +248,9 @@ In a live panel evaluation, the system demonstrates:
 ## 13. Project status
 
 | Area | Owner | Status |
-| --- | --- | --- |
+|---|---|---|
 | Image branch and rare-class detection | A | Not started |
-| Sensor probe hardware | B | Not started |
+| Wireless probe hardware (ESP32-CAM and sensors) | B | Not started |
 | Sensor model | B | Not started |
 | Fusion model | A + B | Not started |
 | Compression and TFLite export | C | Not started |
@@ -256,7 +264,7 @@ Update this table as work progresses.
 ## 14. Team
 
 | Member | Name | GitHub |
-| --- | --- | --- |
+|---|---|---|
 | A | | |
 | B | | |
 | C | | |
