@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/navigation/step_indicator.dart';
 import '../../../../core/state/nav_state.dart';
+import '../../../../core/state/probe_state.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -13,6 +14,7 @@ class ResultScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final navController = ref.read(navigationControllerProvider);
+    final selectedCapture = ref.watch(selectedCaptureProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -53,25 +55,35 @@ class ResultScreen extends ConsumerWidget {
                   boxShadow: AppShadows.level1,
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: Image.asset(
-                  'assets/images/avatas/user_avatar_type_II.png',
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, _, _) => const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.face_rounded,
-                        size: 72.0,
-                        color: AppColors.primary,
+                child: selectedCapture != null && selectedCapture.imageBytes.isNotEmpty
+                    ? Image.memory(
+                        selectedCapture.imageBytes,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, _, _) => const Icon(
+                          Icons.face_rounded,
+                          size: 72.0,
+                          color: AppColors.primary,
+                        ),
+                      )
+                    : Image.asset(
+                        'assets/images/avatas/user_avatar_type_II.png',
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, _, _) => const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.face_rounded,
+                              size: 72.0,
+                              color: AppColors.primary,
+                            ),
+                            SizedBox(height: AppSpacing.s8),
+                            Text(
+                              'Captured Face Region (OV2640)',
+                              style: AppTextStyles.caption,
+                            ),
+                          ],
+                        ),
                       ),
-                      SizedBox(height: AppSpacing.s8),
-                      Text(
-                        'Captured Face Region (OV2640)',
-                        style: AppTextStyles.caption,
-                      ),
-                    ],
-                  ),
-                ),
               ),
               const SizedBox(height: AppSpacing.s12),
 
@@ -81,7 +93,9 @@ class ResultScreen extends ConsumerWidget {
                   _buildSensorPill(
                     icon: Icons.water_drop_rounded,
                     label: 'Moisture',
-                    value: '42%',
+                    value: selectedCapture != null
+                        ? '${selectedCapture.sensorReading.moisture.toStringAsFixed(1)}%'
+                        : '42%',
                     bgColor: AppColors.sensorMoistureBg,
                     iconColor: AppColors.sensorMoistureIcon,
                   ),
@@ -89,7 +103,9 @@ class ResultScreen extends ConsumerWidget {
                   _buildSensorPill(
                     icon: Icons.device_thermostat_rounded,
                     label: 'Temperature',
-                    value: '32.4°C',
+                    value: selectedCapture != null
+                        ? '${selectedCapture.sensorReading.temperature.toStringAsFixed(1)}°C'
+                        : '32.4°C',
                     bgColor: AppColors.sensorTempBg,
                     iconColor: AppColors.sensorTempIcon,
                   ),
@@ -97,7 +113,9 @@ class ResultScreen extends ConsumerWidget {
                   _buildSensorPill(
                     icon: Icons.palette_outlined,
                     label: 'Color Index',
-                    value: '68',
+                    value: selectedCapture != null
+                        ? '${selectedCapture.sensorReading.colorIndex}'
+                        : '68',
                     bgColor: AppColors.sensorColorBg,
                     iconColor: AppColors.sensorColorIcon,
                   ),

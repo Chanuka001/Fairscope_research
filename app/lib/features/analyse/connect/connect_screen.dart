@@ -124,15 +124,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                         ref.read(selectedCaptureProvider.notifier).select(capture);
                         navController.goToStep(2);
                       },
-                      onDelete: () {
-                        ref.read(pendingCapturesProvider.notifier).removeCapture(capture.id);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Capture ${capture.id} deleted'),
-                            duration: const Duration(seconds: 1),
-                          ),
-                        );
-                      },
+                      onDelete: () => _confirmDelete(capture.id),
                     ),
                   );
                 }),
@@ -171,6 +163,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
         dotColor = AppColors.success;
         statusText = 'Probe connected';
         trailing = Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.signal_cellular_alt_rounded, size: 16.0, color: AppColors.primary),
             const SizedBox(width: AppSpacing.s4),
@@ -181,6 +174,25 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
               style: AppTextStyles.caption.copyWith(
                 fontWeight: FontWeight.w600,
                 color: AppColors.onPrimaryContainer,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.s8),
+            GestureDetector(
+              onTap: () => ref.read(probeStatusProvider.notifier).disconnect(),
+              child: Tooltip(
+                message: 'Disconnect probe',
+                child: Container(
+                  padding: const EdgeInsets.all(3.0),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface.withValues(alpha: 0.8),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.power_settings_new_rounded,
+                    size: 13.0,
+                    color: AppColors.secondaryText,
+                  ),
+                ),
               ),
             ),
           ],
@@ -715,6 +727,59 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _confirmDelete(String captureId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadii.large),
+        ),
+        title: Text(
+          'Delete capture?',
+          style: AppTextStyles.title.copyWith(fontSize: 18.0),
+        ),
+        content: Text(
+          'This will remove this unanalysed capture from memory. This action cannot be undone.',
+          style: AppTextStyles.body.copyWith(
+            color: AppColors.secondaryText,
+            fontSize: 14.0,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              'Cancel',
+              style: AppTextStyles.label.copyWith(color: AppColors.secondaryText),
+            ),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: AppColors.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadii.small),
+              ),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      ref.read(pendingCapturesProvider.notifier).removeCapture(captureId);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Capture $captureId deleted'),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    }
   }
 
   static String _monthName(int month) {
