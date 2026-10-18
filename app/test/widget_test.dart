@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fairscope_app/main.dart';
 
 void main() {
-  testWidgets('Task 1 Verification: Tabs switch, steps move forward and back, tabs hidden in steps 2-4', (WidgetTester tester) async {
+  testWidgets('Task 1 & 2 Verification: Onboarding consent unlocks app, tabs switch, steps move forward and back', (WidgetTester tester) async {
     // Configure test viewport
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1.0;
@@ -19,7 +19,36 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // 2. Verify Step 1 is visible initially
+    // 2. Verify Onboarding / Consent Screen is shown on first launch
+    expect(find.text('Your data and privacy'), findsOneWidget);
+    expect(find.text('Data is used for research only'), findsOneWidget);
+    expect(find.text('I understand and agree'), findsOneWidget);
+
+    // Checkbox is initially unchecked
+    final checkboxFinder = find.byType(Checkbox);
+    expect(checkboxFinder, findsOneWidget);
+    final checkbox = tester.widget<Checkbox>(checkboxFinder);
+    expect(checkbox.value, isFalse);
+
+    // Continue button is initially disabled
+    final continueBtnFinder = find.widgetWithText(FilledButton, 'Continue');
+    expect(continueBtnFinder, findsOneWidget);
+    final continueBtn = tester.widget<FilledButton>(continueBtnFinder);
+    expect(continueBtn.onPressed, isNull);
+
+    // 3. Tap Checkbox to agree
+    await tester.tap(find.text('I understand and agree'));
+    await tester.pumpAndSettle();
+
+    // Now Continue button is enabled
+    final enabledContinueBtn = tester.widget<FilledButton>(continueBtnFinder);
+    expect(enabledContinueBtn.onPressed, isNotNull);
+
+    // 4. Tap Continue to unlock the app
+    await tester.tap(continueBtnFinder);
+    await tester.pumpAndSettle();
+
+    // 5. Verify Step 1 is now visible
     expect(find.text('Step 1 of 4: Connect'), findsOneWidget);
     expect(find.text('Probe connected'), findsOneWidget);
     // Verify bottom nav destinations exist
@@ -38,19 +67,19 @@ void main() {
       findsOneWidget,
     );
 
-    // 3. Tap 'Analyse' button on the pending capture card to go to Step 2
+    // 6. Tap 'Analyse' button on the pending capture card to go to Step 2
     final analyseBtn = find.widgetWithText(FilledButton, 'Analyse');
     expect(analyseBtn, findsWidgets);
     await tester.tap(analyseBtn.first);
     await tester.pumpAndSettle();
 
-    // 4. Verify Step 2 is displayed
+    // 7. Verify Step 2 is displayed
     expect(find.text('Result'), findsOneWidget);
     expect(find.text('Step 2 of 4'), findsOneWidget);
     // Verify bottom nav is now HIDDEN
     expect(find.byType(NavigationBar), findsNothing);
 
-    // 5. Tap 'Explain' button to go to Step 3
+    // 8. Tap 'Explain' button to go to Step 3
     final explainBtn = find.widgetWithText(FilledButton, 'Explain');
     expect(explainBtn, findsOneWidget);
     await tester.ensureVisible(explainBtn);
@@ -58,12 +87,12 @@ void main() {
     await tester.tap(explainBtn);
     await tester.pumpAndSettle();
 
-    // 6. Verify Step 3 is displayed
+    // 9. Verify Step 3 is displayed
     expect(find.text('Explanation'), findsOneWidget);
     expect(find.text('Step 3 of 4'), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
 
-    // 7. Tap 'Model performance' to go to Step 4
+    // 10. Tap 'Model performance' to go to Step 4
     final performanceBtn = find.widgetWithText(OutlinedButton, 'Model performance');
     expect(performanceBtn, findsOneWidget);
     await tester.ensureVisible(performanceBtn);
@@ -71,30 +100,29 @@ void main() {
     await tester.tap(performanceBtn);
     await tester.pumpAndSettle();
 
-    // 8. Verify Step 4 is displayed
+    // 11. Verify Step 4 is displayed
     expect(find.text('Performance'), findsOneWidget);
     expect(find.text('Step 4 of 4'), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
 
-    // 9. Tap back button to return to Step 3
+    // 12. Tap back button to return to Step 3
     final backBtn = find.byIcon(Icons.arrow_back_rounded);
     await tester.tap(backBtn);
     await tester.pumpAndSettle();
     expect(find.text('Explanation'), findsOneWidget);
 
-    // 10. Tap back button to return to Step 2
+    // 13. Tap back button to return to Step 2
     await tester.tap(backBtn);
     await tester.pumpAndSettle();
     expect(find.text('Result'), findsOneWidget);
 
-    // 11. Tap back button to return to Step 1
+    // 14. Tap back button to return to Step 1
     await tester.tap(backBtn);
     await tester.pumpAndSettle();
     expect(find.text('Step 1 of 4: Connect'), findsOneWidget);
-    // Bottom nav should be visible again
     expect(find.byType(NavigationBar), findsOneWidget);
 
-    // 12. Switch to History Tab
+    // 15. Switch to History Tab
     await tester.tap(find.text('History'));
     await tester.pumpAndSettle();
     expect(find.text('FS-0003'), findsOneWidget);
