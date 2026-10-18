@@ -96,6 +96,51 @@ class PerformanceScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.s16),
               ],
 
+              // Benchmark Error banner
+              if (benchmarkState.error != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.s12),
+                  decoration: BoxDecoration(
+                    color: AppColors.errorContainer.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(AppRadii.medium),
+                    border: Border.all(color: AppColors.error.withValues(alpha: 0.5)),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.error_outline_rounded, size: 20.0, color: AppColors.error),
+                      const SizedBox(width: AppSpacing.s8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Benchmark Error',
+                              style: AppTextStyles.label.copyWith(
+                                color: AppColors.error,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 2.0),
+                            Text(
+                              benchmarkState.error!,
+                              style: AppTextStyles.caption.copyWith(color: AppColors.text),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded, size: 18.0, color: AppColors.secondaryText),
+                        onPressed: () => ref.read(benchmarkStateProvider.notifier).reset(),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.s16),
+              ],
+
               // Run Benchmark Action Button
               FilledButton(
                 style: FilledButton.styleFrom(

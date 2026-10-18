@@ -387,7 +387,37 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                           ],
                         ),
                       )
-                    : Column(
+                    : analysis.error != null
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24.0),
+                            child: Column(
+                              children: [
+                                const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 36.0),
+                                const SizedBox(height: AppSpacing.s8),
+                                Text(
+                                  'Inference Error',
+                                  style: AppTextStyles.title.copyWith(color: AppColors.error, fontWeight: FontWeight.w700),
+                                ),
+                                const SizedBox(height: AppSpacing.s4),
+                                Text(
+                                  analysis.error!,
+                                  style: AppTextStyles.caption.copyWith(color: AppColors.secondaryText),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: AppSpacing.s12),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    if (selectedCapture != null) {
+                                      ref.read(analysisProvider.notifier).analyseCapture(selectedCapture);
+                                    }
+                                  },
+                                  icon: const Icon(Icons.refresh_rounded, size: 18.0),
+                                  label: const Text('Retry Analysis'),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Column(
                         children: [
                           Text(
                             'Predicted skin condition',
