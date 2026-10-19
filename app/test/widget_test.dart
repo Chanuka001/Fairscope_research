@@ -49,7 +49,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // 5. Verify Step 1 is now visible
-    expect(find.text('Step 1 of 4: Connect'), findsOneWidget);
+    expect(find.text('Pending Captures'), findsOneWidget);
     expect(find.text('Probe connected'), findsOneWidget);
     // Verify bottom nav destinations exist
     expect(
@@ -134,7 +134,7 @@ void main() {
     // 14. Tap back button to return to Step 1
     await tester.tap(backBtn);
     await tester.pumpAndSettle();
-    expect(find.text('Step 1 of 4: Connect'), findsOneWidget);
+    expect(find.text('Pending Captures'), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
 
     // 15. Switch to History Tab
