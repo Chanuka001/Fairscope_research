@@ -10,14 +10,24 @@ import '../../features/analyse/performance/performance_screen.dart';
 import '../../features/history/history_screen.dart';
 
 /// Main navigation shell managing the 2 tabs and nested 4-step flow
-class NavShell extends ConsumerWidget {
+class NavShell extends ConsumerStatefulWidget {
   const NavShell({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NavShell> createState() => _NavShellState();
+}
+
+class _NavShellState extends ConsumerState<NavShell> {
+  int _lastStep = 1;
+
+  @override
+  Widget build(BuildContext context) {
     final currentTab = ref.watch(bottomNavIndexProvider);
     final currentStep = ref.watch(analyseStepProvider);
     final navController = ref.read(navigationControllerProvider);
+
+    final isForward = currentStep >= _lastStep;
+    _lastStep = currentStep;
 
     // Bottom navigation is hidden inside Analyse steps 2 to 4
     final showBottomNav = currentTab == 1 || (currentTab == 0 && currentStep == 1);
@@ -33,8 +43,8 @@ class NavShell extends ConsumerWidget {
         body: IndexedStack(
           index: currentTab,
           children: [
-            // Analyse Tab Flow (Steps 1 to 4)
-            _buildAnalyseFlow(currentStep),
+            // Analyse Tab Flow (Steps 1 to 4 with animated transitions)
+            _buildAnalyseFlow(currentStep, isForward),
             // History Tab
             const HistoryScreen(),
           ],
@@ -71,8 +81,35 @@ class NavShell extends ConsumerWidget {
     );
   }
 
-  Widget _buildAnalyseFlow(int currentStep) {
-    switch (currentStep) {
+  Widget _buildAnalyseFlow(int currentStep, bool isForward) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 280),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, animation) {
+        final beginOffset = isForward
+            ? const Offset(0.06, 0.0)
+            : const Offset(-0.06, 0.0);
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: beginOffset,
+              end: Offset.zero,
+            ).animate(animation),
+            child: child,
+          ),
+        );
+      },
+      child: KeyedSubtree(
+        key: ValueKey<int>(currentStep),
+        child: _stepWidget(currentStep),
+      ),
+    );
+  }
+
+  Widget _stepWidget(int step) {
+    switch (step) {
       case 1:
         return const ConnectScreen();
       case 2:

@@ -25,7 +25,20 @@ class FairScopeApp extends ConsumerWidget {
       title: 'FairScope',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: hasCompletedOnboarding ? const NavShell() : const OnboardingScreen(),
+      home: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 350),
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
+        transitionBuilder: (child, animation) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+        child: hasCompletedOnboarding
+            ? const NavShell(key: ValueKey('nav_shell'))
+            : const OnboardingScreen(key: ValueKey('onboarding_screen')),
+      ),
     );
   }
 }
