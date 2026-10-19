@@ -228,6 +228,19 @@ void main() {
       expect(updatedRecords.length, 2);
       expect(updatedRecords.first.id, 'FS-0002');
       expect(updatedRecords.last.id, 'FS-0001');
+
+      // Test back navigation: opening record from History and tapping back returns to History tab (tab 1)
+      notifier.openRecord(secondRecord);
+      expect(container.read(bottomNavIndexProvider), 0);
+      expect(container.read(analyseStepProvider), 2);
+      expect(container.read(openedFromHistoryProvider), isTrue);
+
+      final nav = container.read(navigationControllerProvider);
+      final handled = nav.handleBack();
+      expect(handled, isTrue);
+      // Verifies it returns directly to the History tab!
+      expect(container.read(bottomNavIndexProvider), 1);
+      expect(container.read(openedFromHistoryProvider), isFalse);
     });
   });
 }

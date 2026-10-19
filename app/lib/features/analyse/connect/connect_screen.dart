@@ -115,6 +115,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                         ref.read(currentScanIdProvider.notifier).setId(null);
                         // Reset analysis state so fresh inference runs
                         ref.read(analysisProvider.notifier).reset();
+                        ref.read(openedFromHistoryProvider.notifier).setFromHistory(false);
                         ref.read(selectedCaptureProvider.notifier).select(capture);
                         navController.goToStep(2);
                       },

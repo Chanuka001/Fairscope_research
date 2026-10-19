@@ -218,18 +218,31 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 vertical: AppSpacing.s8,
               ),
               child: Container(
+                height: 48.0,
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(28.0),
-                  border: Border.all(color: AppColors.border),
-                  boxShadow: AppShadows.level1,
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.35),
+                    width: 1.2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.06),
+                      blurRadius: 8.0,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
+                clipBehavior: Clip.antiAlias,
                 child: TextField(
                   controller: _searchController,
+                  textAlignVertical: TextAlignVertical.center,
                   onChanged: (val) {
                     ref.read(historySearchProvider.notifier).setQuery(val);
                   },
                   decoration: InputDecoration(
+                    isDense: true,
                     hintText: 'Search by ID, label or condition',
                     hintStyle: AppTextStyles.body.copyWith(
                       color: AppColors.secondaryText,
@@ -237,7 +250,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     ),
                     prefixIcon: const Icon(
                       Icons.search_rounded,
-                      color: AppColors.secondaryText,
+                      color: AppColors.primary,
                       size: 20.0,
                     ),
                     suffixIcon: _searchController.text.isNotEmpty
@@ -254,7 +267,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     focusedBorder: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.s16,
-                      vertical: AppSpacing.s12,
                     ),
                   ),
                 ),

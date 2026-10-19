@@ -18,11 +18,16 @@ class NavShell extends ConsumerStatefulWidget {
 }
 
 class _NavShellState extends ConsumerState<NavShell> {
+  int _lastStep = 1;
+
   @override
   Widget build(BuildContext context) {
     final currentTab = ref.watch(bottomNavIndexProvider);
     final currentStep = ref.watch(analyseStepProvider);
     final navController = ref.read(navigationControllerProvider);
+
+    final isForward = currentStep >= _lastStep;
+    _lastStep = currentStep;
 
     // Bottom navigation is hidden inside Analyse steps 2 to 4
     final showBottomNav = currentTab == 1 || (currentTab == 0 && currentStep == 1);
@@ -35,14 +40,22 @@ class _NavShellState extends ConsumerState<NavShell> {
         }
       },
       child: Scaffold(
-        body: IndexedStack(
-          index: currentTab,
-          children: [
-            // Analyse Tab Flow (Steps 1 to 4 with smooth fade transition)
-            _buildAnalyseFlow(currentStep),
-            // History Tab
-            const HistoryScreen(),
-          ],
+        body: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 260),
+          switchInCurve: Curves.easeOut,
+          switchOutCurve: Curves.easeIn,
+          transitionBuilder: (child, animation) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          child: currentTab == 0
+              ? KeyedSubtree(
+                  key: const ValueKey('tab_analyse'),
+                  child: _buildAnalyseFlow(currentStep, isForward),
+                )
+              : const KeyedSubtree(
+                  key: ValueKey('tab_history'),
+                  child: HistoryScreen(),
+                ),
         ),
         bottomNavigationBar: showBottomNav
             ? Container(
@@ -76,16 +89,52 @@ class _NavShellState extends ConsumerState<NavShell> {
     );
   }
 
-  Widget _buildAnalyseFlow(int currentStep) {
+  Widget _buildAnalyseFlow(int currentStep, bool isForward) {
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
-      switchInCurve: Curves.easeOut,
-      switchOutCurve: Curves.easeIn,
+      duration: const Duration(milliseconds: 300),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
       transitionBuilder: (child, animation) {
-        return FadeTransition(
-          opacity: animation,
-          child: child,
-        );
+        final isIncoming = (child.key as ValueKey<int>?)?.value == currentStep;
+        if (isIncoming) {
+          final inOffset = Tween<Offset>(
+            begin: isForward ? const Offset(0.18, 0.0) : const Offset(-0.18, 0.0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          ));
+          final inFade = CurvedAnimation(
+            parent: animation,
+            curve: const Interval(0.15, 1.0, curve: Curves.easeOut),
+          );
+          return SlideTransition(
+            position: inOffset,
+            child: FadeTransition(
+              opacity: inFade,
+              child: child,
+            ),
+          );
+        } else {
+          final outOffset = Tween<Offset>(
+            begin: isForward ? const Offset(-0.08, 0.0) : const Offset(0.08, 0.0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeInCubic,
+          ));
+          final outFade = CurvedAnimation(
+            parent: animation,
+            curve: const Interval(0.0, 0.40, curve: Curves.easeIn),
+          );
+          return SlideTransition(
+            position: outOffset,
+            child: FadeTransition(
+              opacity: outFade,
+              child: child,
+            ),
+          );
+        }
       },
       child: KeyedSubtree(
         key: ValueKey<int>(currentStep),

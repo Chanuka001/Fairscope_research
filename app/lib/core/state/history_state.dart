@@ -116,6 +116,9 @@ class HistoryNotifier extends AsyncNotifier<List<ScanRecord>> {
     final nav = ref.read(navigationControllerProvider);
     nav.setTab(0);
     nav.goToStep(2);
+
+    // 5. Track that this view was opened from History
+    ref.read(openedFromHistoryProvider.notifier).setFromHistory(true);
   }
 }
 

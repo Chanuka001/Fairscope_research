@@ -44,6 +44,17 @@ class AnalyseStepNotifier extends Notifier<int> {
 final analyseStepProvider =
     NotifierProvider<AnalyseStepNotifier, int>(AnalyseStepNotifier.new);
 
+/// Tracks whether the active step view was opened directly from a record in the History tab.
+class OpenedFromHistoryNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void setFromHistory(bool value) => state = value;
+}
+
+final openedFromHistoryProvider =
+    NotifierProvider<OpenedFromHistoryNotifier, bool>(OpenedFromHistoryNotifier.new);
+
 /// Controller to navigate between steps and tabs in the FairScope flow
 final navigationControllerProvider =
     Provider((ref) => NavigationController(ref));
@@ -53,6 +64,7 @@ class NavigationController {
   NavigationController(this._ref);
 
   void setTab(int index) {
+    _ref.read(openedFromHistoryProvider.notifier).setFromHistory(false);
     _ref.read(bottomNavIndexProvider.notifier).setTab(index);
   }
 
@@ -67,10 +79,18 @@ class NavigationController {
   bool handleBack() {
     final currentStep = _ref.read(analyseStepProvider);
     final currentTab = _ref.read(bottomNavIndexProvider);
+    final openedFromHistory = _ref.read(openedFromHistoryProvider);
 
     if (currentTab == 1) {
       // If on History tab, back returns to Analyse tab
       _ref.read(bottomNavIndexProvider.notifier).setTab(0);
+      return true;
+    }
+
+    // If on Step 2 and this scan was opened from History, back returns directly to the History tab!
+    if (currentStep == 2 && openedFromHistory) {
+      _ref.read(openedFromHistoryProvider.notifier).setFromHistory(false);
+      _ref.read(bottomNavIndexProvider.notifier).setTab(1);
       return true;
     }
 
