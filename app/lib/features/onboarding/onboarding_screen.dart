@@ -28,58 +28,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             children: [
               const Spacer(flex: 1),
 
-              // Prominent Brand Header: App Logo Emblem + Dual-Color "FairScope" Typography
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 58.0,
-                    height: 58.0,
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(16.0),
-                      boxShadow: AppShadows.level1,
-                    ),
-                    padding: const EdgeInsets.all(4.0),
-                    child: Image.asset(
-                      'assets/icons/appLogo.png',
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, _, _) => const Icon(
-                        Icons.eco_rounded,
-                        color: AppColors.primary,
-                        size: 36.0,
-                      ),
-                    ),
+              // Prominent Brand Header: Official FairScope Logo with Name
+              Center(
+                child: Image.asset(
+                  'assets/images/logoWithName.png',
+                  height: 135.0,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, _, _) => const Icon(
+                    Icons.eco_rounded,
+                    color: AppColors.primary,
+                    size: 64.0,
                   ),
-                  const SizedBox(width: AppSpacing.s12),
-                  RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Fair',
-                          style: AppTextStyles.display.copyWith(
-                            fontSize: 34.0,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.primary,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        TextSpan(
-                          text: 'Scope',
-                          style: AppTextStyles.display.copyWith(
-                            fontSize: 34.0,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.secondary,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
               ),
-              const SizedBox(height: AppSpacing.s16),
+              const SizedBox(height: AppSpacing.s12),
 
               // Subtitle
               SizedBox(
@@ -222,6 +184,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   style: AppTextStyles.label.copyWith(
                     fontWeight: FontWeight.w700,
                     fontSize: 16.0,
+                    color: _agreed ? AppColors.onPrimary : AppColors.disabledText,
                   ),
                 ),
               ),
