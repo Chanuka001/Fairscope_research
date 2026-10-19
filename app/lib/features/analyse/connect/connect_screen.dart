@@ -136,12 +136,13 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
     );
   }
 
-  /// Probe hardware connection card with centered power button on second line
+  /// Probe hardware connection pill
   Widget _buildProbeStatusPill(BuildContext context, ProbeConnectionStatus status) {
     Color bg;
     Color border;
     Color dotColor;
     String statusText;
+    late final Widget trailing;
 
     switch (status) {
       case ProbeConnectionStatus.connected:
@@ -149,12 +150,55 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
         border = AppColors.primary.withValues(alpha: 0.25);
         dotColor = AppColors.success;
         statusText = 'Probe connected';
+        trailing = Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.signal_cellular_alt_rounded, size: 16.0, color: AppColors.primary),
+            const SizedBox(width: AppSpacing.s4),
+            const Icon(Icons.battery_5_bar_rounded, size: 16.0, color: AppColors.primary),
+            const SizedBox(width: 4.0),
+            Text(
+              '82%',
+              style: AppTextStyles.caption.copyWith(
+                fontWeight: FontWeight.w700,
+                color: AppColors.onPrimaryContainer,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.s8),
+            GestureDetector(
+              onTap: () => ref.read(probeStatusProvider.notifier).disconnect(),
+              child: Tooltip(
+                message: 'Disconnect probe',
+                child: Container(
+                  width: 28.0,
+                  height: 28.0,
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                    boxShadow: AppShadows.level1,
+                  ),
+                  child: const Icon(
+                    Icons.power_settings_new_rounded,
+                    size: 16.0,
+                    color: AppColors.error,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
         break;
       case ProbeConnectionStatus.connecting:
         bg = AppColors.warningContainer.withValues(alpha: 0.5);
         border = AppColors.warning.withValues(alpha: 0.4);
         dotColor = AppColors.warning;
         statusText = 'Connecting to probe...';
+        trailing = const SizedBox(
+          width: 16.0,
+          height: 16.0,
+          child: CircularProgressIndicator(strokeWidth: 2.0, color: AppColors.warning),
+        );
         break;
       case ProbeConnectionStatus.off:
       case ProbeConnectionStatus.lost:
@@ -165,6 +209,35 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
         statusText = status == ProbeConnectionStatus.off
             ? 'Probe disconnected'
             : 'Probe connection lost';
+        trailing = InkWell(
+          onTap: () => ref.read(probeStatusProvider.notifier).connect(),
+          borderRadius: BorderRadius.circular(AppRadii.small),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(AppRadii.small),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.power_settings_new_rounded,
+                  size: 15.0,
+                  color: AppColors.onPrimary,
+                ),
+                const SizedBox(width: 4.0),
+                Text(
+                  'Connect',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.onPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
         break;
     }
 
@@ -174,176 +247,57 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
         color: bg,
         borderRadius: BorderRadius.circular(AppRadii.large),
         border: Border.all(color: border),
-        boxShadow: AppShadows.level1,
       ),
-      child: Column(
+      child: Row(
         children: [
-          // Line 1: Sensor icon, status text, and battery/signal telemetry
-          Row(
-            children: [
-              Container(
-                width: 32.0,
-                height: 32.0,
-                padding: const EdgeInsets.all(4.0),
-                decoration: const BoxDecoration(
-                  color: AppColors.surface,
-                  shape: BoxShape.circle,
-                ),
-                child: Image.asset(
-                  'assets/images/sensor.png',
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, _, _) => const Icon(
-                    Icons.sensors_rounded,
-                    color: AppColors.primary,
-                    size: 18.0,
+          Container(
+            width: 32.0,
+            height: 32.0,
+            padding: const EdgeInsets.all(4.0),
+            decoration: const BoxDecoration(
+              color: AppColors.surface,
+              shape: BoxShape.circle,
+            ),
+            child: Image.asset(
+              'assets/images/sensor.png',
+              fit: BoxFit.contain,
+              errorBuilder: (_, _, _) => const Icon(
+                Icons.sensors_rounded,
+                color: AppColors.primary,
+                size: 18.0,
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.s12),
+          Expanded(
+            child: Row(
+              children: [
+                Container(
+                  width: 8.0,
+                  height: 8.0,
+                  decoration: BoxDecoration(
+                    color: dotColor,
+                    shape: BoxShape.circle,
                   ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.s12),
-              Expanded(
-                child: Row(
-                  children: [
-                    Container(
-                      width: 8.0,
-                      height: 8.0,
-                      decoration: BoxDecoration(
-                        color: dotColor,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.s8),
-                    Flexible(
-                      child: Text(
-                        statusText,
-                        style: AppTextStyles.label.copyWith(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14.5,
-                          color: AppColors.text,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (status == ProbeConnectionStatus.connected)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.signal_cellular_alt_rounded, size: 16.0, color: AppColors.primary),
-                    const SizedBox(width: AppSpacing.s4),
-                    const Icon(Icons.battery_5_bar_rounded, size: 16.0, color: AppColors.primary),
-                    const SizedBox(width: 4.0),
-                    Text(
-                      '82%',
-                      style: AppTextStyles.caption.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.onPrimaryContainer,
-                      ),
-                    ),
-                  ],
-                ),
-            ],
-          ),
-
-          const SizedBox(height: AppSpacing.s12),
-
-          // Line 2: Centered, bigger power action button
-          Center(
-            child: _buildCenteredPowerButton(status),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCenteredPowerButton(ProbeConnectionStatus status) {
-    if (status == ProbeConnectionStatus.connected) {
-      return GestureDetector(
-        onTap: () => ref.read(probeStatusProvider.notifier).disconnect(),
-        child: Tooltip(
-          message: 'Disconnect probe',
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppRadii.extraLarge),
-              border: Border.all(color: AppColors.error.withValues(alpha: 0.35)),
-              boxShadow: AppShadows.level1,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.power_settings_new_rounded,
-                  size: 20.0,
-                  color: AppColors.error,
-                ),
                 const SizedBox(width: AppSpacing.s8),
-                Text(
-                  'Disconnect Probe',
-                  style: AppTextStyles.caption.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.error,
-                    fontSize: 13.0,
+                Flexible(
+                  child: Text(
+                    statusText,
+                    style: AppTextStyles.label.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.text,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      );
-    } else if (status == ProbeConnectionStatus.connecting) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 16.0,
-              height: 16.0,
-              child: CircularProgressIndicator(strokeWidth: 2.0, color: AppColors.warning),
-            ),
-            SizedBox(width: AppSpacing.s8),
-            Text(
-              'Connecting...',
-              style: AppTextStyles.caption,
-            ),
-          ],
-        ),
-      );
-    } else {
-      return GestureDetector(
-        onTap: () => ref.read(probeStatusProvider.notifier).connect(),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(AppRadii.extraLarge),
-            boxShadow: AppShadows.level1,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.power_settings_new_rounded,
-                size: 20.0,
-                color: AppColors.onPrimary,
-              ),
-              const SizedBox(width: AppSpacing.s8),
-              Text(
-                'Connect Probe',
-                style: AppTextStyles.caption.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.onPrimary,
-                  fontSize: 13.0,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
+          trailing,
+        ],
+      ),
+    );
   }
 
   /// Simulate Device Button control for mock hardware mode
