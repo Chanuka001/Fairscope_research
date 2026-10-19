@@ -1,4 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'history_state.dart';
+import 'model_state.dart';
+import 'probe_state.dart';
 
 /// Currently selected bottom navigation tab (0 = Analyse, 1 = History)
 class BottomNavNotifier extends Notifier<int> {
@@ -64,8 +67,20 @@ class NavigationController {
   NavigationController(this._ref);
 
   void setTab(int index) {
+    if (index == 0) {
+      // Switching to Analyse tab from bottom nav always opens Step 1 cleanly
+      _ref.read(analyseStepProvider.notifier).goToStep(1);
+      _clearHistoryScanState();
+    }
     _ref.read(openedFromHistoryProvider.notifier).setFromHistory(false);
     _ref.read(bottomNavIndexProvider.notifier).setTab(index);
+  }
+
+  void _clearHistoryScanState() {
+    _ref.read(currentScanIdProvider.notifier).setId(null);
+    _ref.read(analysisProvider.notifier).reset();
+    _ref.read(selectedCaptureProvider.notifier).clear();
+    _ref.read(selectedRecordProvider.notifier).clear();
   }
 
   void goToStep(int step) {
@@ -82,7 +97,8 @@ class NavigationController {
     final openedFromHistory = _ref.read(openedFromHistoryProvider);
 
     if (currentTab == 1) {
-      // If on History tab, back returns to Analyse tab
+      // If on History tab, back returns to Analyse tab Step 1
+      _ref.read(analyseStepProvider.notifier).goToStep(1);
       _ref.read(bottomNavIndexProvider.notifier).setTab(0);
       return true;
     }
@@ -90,7 +106,9 @@ class NavigationController {
     // If on Step 2 and this scan was opened from History, back returns directly to the History tab!
     if (currentStep == 2 && openedFromHistory) {
       _ref.read(openedFromHistoryProvider.notifier).setFromHistory(false);
+      _ref.read(analyseStepProvider.notifier).goToStep(1);
       _ref.read(bottomNavIndexProvider.notifier).setTab(1);
+      _clearHistoryScanState();
       return true;
     }
 

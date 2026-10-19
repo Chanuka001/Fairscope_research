@@ -113,9 +113,8 @@ class HistoryNotifier extends AsyncNotifier<List<ScanRecord>> {
         );
 
     // 4. Navigate directly to Step 2 in Analyse tab
-    final nav = ref.read(navigationControllerProvider);
-    nav.setTab(0);
-    nav.goToStep(2);
+    ref.read(bottomNavIndexProvider.notifier).setTab(0);
+    ref.read(analyseStepProvider.notifier).goToStep(2);
 
     // 5. Track that this view was opened from History
     ref.read(openedFromHistoryProvider.notifier).setFromHistory(true);

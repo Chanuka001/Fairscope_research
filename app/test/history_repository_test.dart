@@ -234,13 +234,23 @@ void main() {
       expect(container.read(bottomNavIndexProvider), 0);
       expect(container.read(analyseStepProvider), 2);
       expect(container.read(openedFromHistoryProvider), isTrue);
+      expect(container.read(currentScanIdProvider), 'FS-0002');
 
       final nav = container.read(navigationControllerProvider);
       final handled = nav.handleBack();
       expect(handled, isTrue);
-      // Verifies it returns directly to the History tab!
+      // Verifies it returns directly to the History tab and resets Analyse step & scan state!
       expect(container.read(bottomNavIndexProvider), 1);
       expect(container.read(openedFromHistoryProvider), isFalse);
+      expect(container.read(analyseStepProvider), 1);
+      expect(container.read(currentScanIdProvider), isNull);
+      expect(container.read(selectedCaptureProvider), isNull);
+
+      // Verifies subsequent tap on Analyse tab opens Step 1 cleanly without re-opening previous record
+      nav.setTab(0);
+      expect(container.read(bottomNavIndexProvider), 0);
+      expect(container.read(analyseStepProvider), 1);
+      expect(container.read(currentScanIdProvider), isNull);
     });
   });
 }
