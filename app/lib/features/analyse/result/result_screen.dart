@@ -25,9 +25,15 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     Future.microtask(() async {
       final capture = ref.read(selectedCaptureProvider);
       final currentPrediction = ref.read(analysisProvider).prediction;
-      if (capture != null && currentPrediction == null) {
-        final pred = await ref.read(analysisProvider.notifier).analyseCapture(capture);
-        if (pred != null && mounted) {
+      final currentId = ref.read(currentScanIdProvider);
+
+      if (capture != null && currentId == null) {
+        if (currentPrediction == null) {
+          final pred = await ref.read(analysisProvider.notifier).analyseCapture(capture);
+          if (pred != null && mounted) {
+            await _checkAndAutoSave();
+          }
+        } else {
           await _checkAndAutoSave();
         }
       }
@@ -411,9 +417,12 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                                 ),
                                 const SizedBox(height: AppSpacing.s12),
                                 ElevatedButton.icon(
-                                  onPressed: () {
+                                  onPressed: () async {
                                     if (selectedCapture != null) {
-                                      ref.read(analysisProvider.notifier).analyseCapture(selectedCapture);
+                                      final pred = await ref.read(analysisProvider.notifier).analyseCapture(selectedCapture);
+                                      if (pred != null && mounted) {
+                                        await _checkAndAutoSave();
+                                      }
                                     }
                                   },
                                   icon: const Icon(Icons.refresh_rounded, size: 18.0),

@@ -18,16 +18,11 @@ class NavShell extends ConsumerStatefulWidget {
 }
 
 class _NavShellState extends ConsumerState<NavShell> {
-  int _lastStep = 1;
-
   @override
   Widget build(BuildContext context) {
     final currentTab = ref.watch(bottomNavIndexProvider);
     final currentStep = ref.watch(analyseStepProvider);
     final navController = ref.read(navigationControllerProvider);
-
-    final isForward = currentStep >= _lastStep;
-    _lastStep = currentStep;
 
     // Bottom navigation is hidden inside Analyse steps 2 to 4
     final showBottomNav = currentTab == 1 || (currentTab == 0 && currentStep == 1);
@@ -43,8 +38,8 @@ class _NavShellState extends ConsumerState<NavShell> {
         body: IndexedStack(
           index: currentTab,
           children: [
-            // Analyse Tab Flow (Steps 1 to 4 with animated transitions)
-            _buildAnalyseFlow(currentStep, isForward),
+            // Analyse Tab Flow (Steps 1 to 4 with smooth fade transition)
+            _buildAnalyseFlow(currentStep),
             // History Tab
             const HistoryScreen(),
           ],
@@ -81,24 +76,15 @@ class _NavShellState extends ConsumerState<NavShell> {
     );
   }
 
-  Widget _buildAnalyseFlow(int currentStep, bool isForward) {
+  Widget _buildAnalyseFlow(int currentStep) {
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 280),
-      switchInCurve: Curves.easeOutCubic,
-      switchOutCurve: Curves.easeInCubic,
+      duration: const Duration(milliseconds: 200),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
       transitionBuilder: (child, animation) {
-        final beginOffset = isForward
-            ? const Offset(0.06, 0.0)
-            : const Offset(-0.06, 0.0);
         return FadeTransition(
           opacity: animation,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: beginOffset,
-              end: Offset.zero,
-            ).animate(animation),
-            child: child,
-          ),
+          child: child,
         );
       },
       child: KeyedSubtree(

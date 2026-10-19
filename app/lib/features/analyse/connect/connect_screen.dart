@@ -4,6 +4,8 @@ import '../../../../core/config/probe_config.dart';
 import '../../../../core/models/capture.dart';
 import '../../../../core/services/http_probe_service.dart';
 import '../../../../core/services/probe_service.dart';
+import '../../../../core/state/history_state.dart';
+import '../../../../core/state/model_state.dart';
 import '../../../../core/state/nav_state.dart';
 import '../../../../core/state/probe_state.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -109,6 +111,10 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                       capture: capture,
                       isNew: index == 0,
                       onAnalyse: () {
+                        // Clear any previously viewed record ID so fresh analysis is auto-saved
+                        ref.read(currentScanIdProvider.notifier).setId(null);
+                        // Reset analysis state so fresh inference runs
+                        ref.read(analysisProvider.notifier).reset();
                         ref.read(selectedCaptureProvider.notifier).select(capture);
                         navController.goToStep(2);
                       },

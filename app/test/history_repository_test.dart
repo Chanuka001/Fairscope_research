@@ -191,6 +191,43 @@ void main() {
       expect(container.read(analysisProvider).prediction?.label, 'Eczema flare');
       expect(container.read(bottomNavIndexProvider), 0);
       expect(container.read(analyseStepProvider), 2);
+
+      // Test subsequent scan saving after resetting currentScanIdProvider
+      container.read(currentScanIdProvider.notifier).setId(null);
+      container.read(analysisProvider.notifier).reset();
+
+      final capture2 = Capture(
+        id: 'CAP-TEST-2',
+        imageBytes: Uint8List.fromList([10, 20, 30]),
+        sensorReading: SensorReading(
+          moisture: 60.0,
+          temperature: 33.0,
+          colorIndex: 1,
+          timestamp: DateTime.now(),
+        ),
+        receivedTime: DateTime.now(),
+      );
+      container.read(selectedCaptureProvider.notifier).select(capture2);
+
+      final secondRecord = await notifier.saveAnalysedScan(
+        capture: capture2,
+        prediction: const Prediction(
+          label: 'Benign Keratosis',
+          confidence: 0.88,
+        ),
+        preprocessMs: 4.0,
+        inferenceMs: 6.5,
+        modelVariant: 'baseline_fp32',
+        label: 'Forehead',
+      );
+
+      expect(secondRecord.id, 'FS-0002');
+      expect(container.read(currentScanIdProvider), 'FS-0002');
+
+      final updatedRecords = container.read(filteredHistoryRecordsProvider);
+      expect(updatedRecords.length, 2);
+      expect(updatedRecords.first.id, 'FS-0002');
+      expect(updatedRecords.last.id, 'FS-0001');
     });
   });
 }

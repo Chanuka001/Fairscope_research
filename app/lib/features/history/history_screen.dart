@@ -220,7 +220,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               child: Container(
                 decoration: BoxDecoration(
                   color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppRadii.medium),
+                  borderRadius: BorderRadius.circular(28.0),
                   border: Border.all(color: AppColors.border),
                   boxShadow: AppShadows.level1,
                 ),
