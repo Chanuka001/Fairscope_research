@@ -532,21 +532,14 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         ),
       ),
 
-      // Fixed Bottom Action Bar
+      // Fixed Bottom Action Bar (Transparent)
       Container(
-        padding: const EdgeInsets.all(AppSpacing.screenPadding),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          border: Border(
-            top: BorderSide(color: AppColors.border.withValues(alpha: 0.6)),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              offset: const Offset(0, -2),
-              blurRadius: 4,
-            ),
-          ],
+        color: Colors.transparent,
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.screenPadding,
+          AppSpacing.s8,
+          AppSpacing.screenPadding,
+          AppSpacing.s16,
         ),
         child: FilledButton(
           style: FilledButton.styleFrom(

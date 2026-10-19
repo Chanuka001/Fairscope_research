@@ -490,75 +490,40 @@ class _ExplainScreenState extends ConsumerState<ExplainScreen> {
         ),
       ),
 
-      // Fixed Bottom Action Bar
+      // Fixed Bottom Action Bar (Transparent)
       Container(
+        color: Colors.transparent,
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.screenPadding,
-          AppSpacing.s12,
+          AppSpacing.s8,
           AppSpacing.screenPadding,
-          AppSpacing.s12,
+          AppSpacing.s16,
         ),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          border: Border(
-            top: BorderSide(color: AppColors.border.withValues(alpha: 0.6)),
+        child: OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size.fromHeight(48.0),
+            side: const BorderSide(color: AppColors.primary, width: 1.5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadii.medium),
+            ),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              offset: const Offset(0, -2),
-              blurRadius: 4,
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size.fromHeight(48.0),
-                side: const BorderSide(color: AppColors.primary, width: 1.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadii.medium),
+          onPressed: () {
+            navController.goToStep(4);
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.bar_chart_rounded, size: 20.0, color: AppColors.primary),
+              const SizedBox(width: AppSpacing.s8),
+              Text(
+                'Model performance',
+                style: AppTextStyles.label.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary,
                 ),
               ),
-              onPressed: () {
-                navController.goToStep(4);
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.bar_chart_rounded, size: 20.0, color: AppColors.primary),
-                  const SizedBox(width: AppSpacing.s8),
-                  Text(
-                    'Model performance',
-                    style: AppTextStyles.label.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 6.0),
-            Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s8, vertical: 2.0),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryContainer.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(AppRadii.small),
-                ),
-                child: Text(
-                  'Research view',
-                  style: AppTextStyles.caption.copyWith(
-                    fontSize: 11.0,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.onPrimaryContainer,
-                  ),
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     ],
