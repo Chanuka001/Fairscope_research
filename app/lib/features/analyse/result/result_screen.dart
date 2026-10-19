@@ -164,60 +164,65 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.screenPadding,
-            vertical: AppSpacing.s12,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Face Region Photo Card
-              Container(
-                width: double.infinity,
-                height: 230.0,
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppRadii.large),
-                  border: Border.all(color: AppColors.border),
-                  boxShadow: AppShadows.level1,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding,
+                  vertical: AppSpacing.s12,
                 ),
-                clipBehavior: Clip.antiAlias,
-                child: selectedCapture != null && selectedCapture.imageBytes.isNotEmpty
-                    ? Image.memory(
-                        selectedCapture.imageBytes,
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, _, _) => const Icon(
-                          Icons.face_rounded,
-                          size: 72.0,
-                          color: AppColors.primary,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Face Region Photo Card (1:1 Square)
+                    AspectRatio(
+                      aspectRatio: 1.0,
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(AppRadii.large),
+                          border: Border.all(color: AppColors.border),
+                          boxShadow: AppShadows.level1,
                         ),
-                      )
-                    : Image.asset(
-                        'assets/images/avatas/result-screen img.png',
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, _, _) => Image.asset(
-                          'assets/images/avatas/user_avatar_type_II.png',
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, _, _) => const Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.face_rounded,
-                                size: 72.0,
-                                color: AppColors.primary,
+                        clipBehavior: Clip.antiAlias,
+                        child: selectedCapture != null && selectedCapture.imageBytes.isNotEmpty
+                            ? Image.memory(
+                                selectedCapture.imageBytes,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => const Icon(
+                                  Icons.face_rounded,
+                                  size: 72.0,
+                                  color: AppColors.primary,
+                                ),
+                              )
+                            : Image.asset(
+                                'assets/images/avatas/result-screen img.png',
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => Image.asset(
+                                  'assets/images/avatas/user_avatar_type_II.png',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, _, _) => const Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.face_rounded,
+                                        size: 72.0,
+                                        color: AppColors.primary,
+                                      ),
+                                      SizedBox(height: AppSpacing.s8),
+                                      Text(
+                                        'Captured Face Region (OV2640)',
+                                        style: AppTextStyles.caption,
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                              SizedBox(height: AppSpacing.s8),
-                              Text(
-                                'Captured Face Region (OV2640)',
-                                style: AppTextStyles.caption,
-                              ),
-                            ],
-                          ),
-                        ),
                       ),
-              ),
-              const SizedBox(height: AppSpacing.s12),
+                    ),
+                    const SizedBox(height: AppSpacing.s12),
 
               // Sensor Pills Row
               Row(
@@ -521,39 +526,57 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                     ],
                   ),
                 ),
-              const SizedBox(height: AppSpacing.s20),
-
-              // Primary Action: Explain Button
-              FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.onPrimary,
-                  minimumSize: const Size.fromHeight(48.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadii.medium),
-                  ),
-                ),
-                onPressed: () => navController.goToStep(3),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Explain prediction',
-                      style: AppTextStyles.label.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.onPrimary,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.s8),
-                    const Icon(Icons.arrow_forward_rounded, size: 18.0),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.s24),
+              const SizedBox(height: AppSpacing.s16),
             ],
           ),
         ),
       ),
+
+      // Fixed Bottom Action Bar
+      Container(
+        padding: const EdgeInsets.all(AppSpacing.screenPadding),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          border: Border(
+            top: BorderSide(color: AppColors.border.withValues(alpha: 0.6)),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              offset: const Offset(0, -2),
+              blurRadius: 4,
+            ),
+          ],
+        ),
+        child: FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.onPrimary,
+            minimumSize: const Size.fromHeight(48.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadii.medium),
+            ),
+          ),
+          onPressed: () => navController.goToStep(3),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Explain prediction',
+                style: AppTextStyles.label.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.onPrimary,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.s8),
+              const Icon(Icons.arrow_forward_rounded, size: 18.0),
+            ],
+          ),
+        ),
+      ),
+    ],
+  ),
+),
     );
   }
 

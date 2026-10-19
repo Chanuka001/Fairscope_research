@@ -86,96 +86,102 @@ class _ExplainScreenState extends ConsumerState<ExplainScreen> {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding, vertical: AppSpacing.s12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Heatmap visualizer container with face avatar
-              Container(
-                width: double.infinity,
-                height: 250.0,
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppRadii.large),
-                  border: Border.all(color: AppColors.border),
-                  boxShadow: AppShadows.level1,
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Stack(
-                  alignment: Alignment.center,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding, vertical: AppSpacing.s12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    selectedCapture != null && selectedCapture.imageBytes.isNotEmpty
-                        ? Image.memory(
-                            selectedCapture.imageBytes,
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, _, _) => Image.asset(
-                              'assets/images/avatas/explane-image.png',
-                              fit: BoxFit.contain,
-                              errorBuilder: (_, _, _) => const Icon(
-                                Icons.face_rounded,
-                                size: 96.0,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          )
-                        : Image.asset(
-                            'assets/images/avatas/explane-image.png',
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, _, _) => Image.asset(
-                              'assets/images/avatas/user_avatar_type_II.png',
-                              fit: BoxFit.contain,
-                              errorBuilder: (_, _, _) => const Icon(
-                                Icons.face_rounded,
-                                size: 96.0,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ),
-                    // Realistic Grad-CAM saliency heat overlay
-                    Opacity(
-                      opacity: _heatmapOpacity,
+                    // Heatmap visualizer container with face avatar (1:1 Square)
+                    AspectRatio(
+                      aspectRatio: 1.0,
                       child: Container(
+                        width: double.infinity,
                         decoration: BoxDecoration(
-                          gradient: RadialGradient(
-                            center: const Alignment(0.15, 0.05),
-                            radius: 0.58,
-                            colors: [
-                              Colors.redAccent.withValues(alpha: 0.85),
-                              Colors.orangeAccent.withValues(alpha: 0.65),
-                              Colors.yellowAccent.withValues(alpha: 0.40),
-                              Colors.tealAccent.withValues(alpha: 0.15),
-                              Colors.transparent,
-                            ],
-                            stops: const [0.0, 0.35, 0.60, 0.85, 1.0],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: AppSpacing.s12,
-                      right: AppSpacing.s12,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s8, vertical: 3.0),
-                        decoration: BoxDecoration(
-                          color: AppColors.surface.withValues(alpha: 0.95),
-                          borderRadius: BorderRadius.circular(AppRadii.small),
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(AppRadii.large),
                           border: Border.all(color: AppColors.border),
+                          boxShadow: AppShadows.level1,
                         ),
-                        child: Text(
-                          'Grad-CAM Heatmap',
-                          style: AppTextStyles.caption.copyWith(
-                            fontSize: 10.0,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.primary,
-                          ),
+                        clipBehavior: Clip.antiAlias,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          fit: StackFit.expand,
+                          children: [
+                            selectedCapture != null && selectedCapture.imageBytes.isNotEmpty
+                                ? Image.memory(
+                                    selectedCapture.imageBytes,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) => Image.asset(
+                                      'assets/images/avatas/explane-image.png',
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, _, _) => const Icon(
+                                        Icons.face_rounded,
+                                        size: 96.0,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  )
+                                : Image.asset(
+                                    'assets/images/avatas/explane-image.png',
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) => Image.asset(
+                                      'assets/images/avatas/user_avatar_type_II.png',
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, _, _) => const Icon(
+                                        Icons.face_rounded,
+                                        size: 96.0,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ),
+                            // Realistic Grad-CAM saliency heat overlay
+                            Opacity(
+                              opacity: _heatmapOpacity,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: RadialGradient(
+                                    center: const Alignment(0.15, 0.05),
+                                    radius: 0.58,
+                                    colors: [
+                                      Colors.redAccent.withValues(alpha: 0.85),
+                                      Colors.orangeAccent.withValues(alpha: 0.65),
+                                      Colors.yellowAccent.withValues(alpha: 0.40),
+                                      Colors.tealAccent.withValues(alpha: 0.15),
+                                      Colors.transparent,
+                                    ],
+                                    stops: const [0.0, 0.35, 0.60, 0.85, 1.0],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: AppSpacing.s12,
+                              right: AppSpacing.s12,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s8, vertical: 3.0),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surface.withValues(alpha: 0.95),
+                                  borderRadius: BorderRadius.circular(AppRadii.small),
+                                  border: Border.all(color: AppColors.border),
+                                ),
+                                child: Text(
+                                  'Grad-CAM Heatmap',
+                                  style: AppTextStyles.caption.copyWith(
+                                    fontSize: 10.0,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.s16),
+                    const SizedBox(height: AppSpacing.s16),
 
               // Heatmap Opacity Slider
               Container(
@@ -478,57 +484,86 @@ class _ExplainScreenState extends ConsumerState<ExplainScreen> {
                 ),
               ),
 
-              const SizedBox(height: AppSpacing.s20),
-
-              // Model Performance Button
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48.0),
-                  side: const BorderSide(color: AppColors.primary, width: 1.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadii.medium),
-                  ),
-                ),
-                onPressed: () {
-                  navController.goToStep(4);
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.bar_chart_rounded, size: 20.0, color: AppColors.primary),
-                    const SizedBox(width: AppSpacing.s8),
-                    Text(
-                      'Model performance',
-                      style: AppTextStyles.label.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.s8),
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s8, vertical: 2.0),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryContainer.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(AppRadii.small),
-                  ),
-                  child: Text(
-                    'Research view',
-                    style: AppTextStyles.caption.copyWith(
-                      fontSize: 11.0,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.onPrimaryContainer,
-                    ),
-                  ),
-                ),
-              ),
+              const SizedBox(height: AppSpacing.s16),
             ],
           ),
         ),
       ),
+
+      // Fixed Bottom Action Bar
+      Container(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.screenPadding,
+          AppSpacing.s12,
+          AppSpacing.screenPadding,
+          AppSpacing.s12,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          border: Border(
+            top: BorderSide(color: AppColors.border.withValues(alpha: 0.6)),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              offset: const Offset(0, -2),
+              blurRadius: 4,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(48.0),
+                side: const BorderSide(color: AppColors.primary, width: 1.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadii.medium),
+                ),
+              ),
+              onPressed: () {
+                navController.goToStep(4);
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.bar_chart_rounded, size: 20.0, color: AppColors.primary),
+                  const SizedBox(width: AppSpacing.s8),
+                  Text(
+                    'Model performance',
+                    style: AppTextStyles.label.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 6.0),
+            Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s8, vertical: 2.0),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryContainer.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(AppRadii.small),
+                ),
+                child: Text(
+                  'Research view',
+                  style: AppTextStyles.caption.copyWith(
+                    fontSize: 11.0,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.onPrimaryContainer,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  ),
+),
     );
   }
 }
