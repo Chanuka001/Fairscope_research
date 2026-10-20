@@ -239,6 +239,7 @@ class TfliteModelRunnerService implements ModelRunnerService {
     dynamic inputTensor, {
     int iterations = 50,
     int warmupIterations = 10,
+    void Function(int current, int total)? onProgress,
   }) async {
     if (_currentVariant == null) {
       throw StateError('Interpreter is not loaded.');
@@ -246,6 +247,10 @@ class TfliteModelRunnerService implements ModelRunnerService {
 
     if (_interpreter == null) {
       final base = _currentVariant == 'baseline_fp32' ? 18.5 : 7.5;
+      for (int i = 0; i < iterations; i++) {
+        onProgress?.call(i + 1, iterations);
+        await Future<void>.delayed(const Duration(milliseconds: 2));
+      }
       return List.generate(iterations, (i) => base + (i % 3) * 0.3);
     }
 
@@ -280,9 +285,11 @@ class TfliteModelRunnerService implements ModelRunnerService {
     // 1. Warm-up runs (not counted in benchmark stats)
     for (int w = 0; w < warmupIterations; w++) {
       _interpreter!.run(input, outputBuffer);
+      // Yield to message loop between warm-ups so UI stays responsive
+      await Future<void>.delayed(Duration.zero);
     }
 
-    // 2. Timed benchmark runs (timing ONLY interpreter call)
+    // 2. Timed benchmark runs (timing ONLY interpreter call for scientific integrity)
     final latencies = <double>[];
     for (int i = 0; i < iterations; i++) {
       final sw = Stopwatch()..start();
@@ -290,10 +297,10 @@ class TfliteModelRunnerService implements ModelRunnerService {
       sw.stop();
       latencies.add(sw.elapsedMicroseconds / 1000.0);
 
-      // Yield 1ms to message loop to keep UI responsive and prevent ANR
-      if (i % 5 == 0) {
-        await Future<void>.delayed(const Duration(milliseconds: 1));
-      }
+      onProgress?.call(i + 1, iterations);
+
+      // Yield 3ms to the UI event loop to allow Flutter to render frames at 60/120 FPS smoothly
+      await Future<void>.delayed(const Duration(milliseconds: 3));
     }
 
     return latencies;

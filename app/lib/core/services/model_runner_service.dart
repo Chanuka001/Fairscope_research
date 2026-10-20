@@ -42,6 +42,7 @@ abstract class ModelRunnerService {
     dynamic inputTensor, {
     int iterations = 50,
     int warmupIterations = 10,
+    void Function(int current, int total)? onProgress,
   });
 
   /// Releases TFLite interpreter and native memory allocations.

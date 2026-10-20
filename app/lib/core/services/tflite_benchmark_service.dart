@@ -69,14 +69,19 @@ class TfliteBenchmarkService implements BenchmarkService {
       } catch (_) {}
 
       // 2. Measure Baseline FP32
-      _updateProgress(0.1);
+      _updateProgress(0.10);
       await modelRunner.loadModel('baseline_fp32');
-      _updateProgress(0.2);
+      _updateProgress(0.15);
 
       final fp32Times = await modelRunner.measureInferenceTimes(
         sampleInput,
         iterations: runs,
         warmupIterations: warmupRuns,
+        onProgress: (current, total) {
+          // Progress from 0.15 to 0.55 (40% of total)
+          final stageProgress = current / total;
+          _updateProgress(0.15 + (stageProgress * 0.40));
+        },
       );
       final fp32Stats = _computeStats(fp32Times);
       final fp32SizeMb = await _getAssetSizeMb(ModelConfig.baselineFp32Path, defaultMb: 14.0);
@@ -85,17 +90,22 @@ class TfliteBenchmarkService implements BenchmarkService {
 
       // 3. Measure Quantized INT8
       await modelRunner.loadModel('quantized_int8');
-      _updateProgress(0.65);
+      _updateProgress(0.60);
 
       final int8Times = await modelRunner.measureInferenceTimes(
         sampleInput,
         iterations: runs,
         warmupIterations: warmupRuns,
+        onProgress: (current, total) {
+          // Progress from 0.60 to 0.95 (35% of total)
+          final stageProgress = current / total;
+          _updateProgress(0.60 + (stageProgress * 0.35));
+        },
       );
       final int8Stats = _computeStats(int8Times);
       final int8SizeMb = await _getAssetSizeMb(ModelConfig.quantizedInt8Path, defaultMb: 4.0);
 
-      _updateProgress(0.95);
+      _updateProgress(1.0);
 
       // 4. Construct Benchmark Result
       final now = DateTime.now();

@@ -16,10 +16,26 @@ class HistoryScreen extends ConsumerStatefulWidget {
 
 class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  bool _isFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() {});
+    });
+    _focusNode.addListener(() {
+      setState(() {
+        _isFocused = _focusNode.hasFocus;
+      });
+    });
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -211,33 +227,52 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Search Bar
+            // Search Bar (Modern, clean, polished surface)
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.screenPadding,
                 vertical: AppSpacing.s8,
               ),
-              child: Container(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
                 height: 48.0,
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(28.0),
+                  color: _isFocused
+                      ? AppColors.surface
+                      : AppColors.surfaceVariant.withValues(alpha: 0.55),
+                  borderRadius: BorderRadius.circular(24.0),
                   border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.35),
-                    width: 1.2,
+                    color: _isFocused
+                        ? AppColors.primary
+                        : AppColors.border,
+                    width: _isFocused ? 1.5 : 1.0,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.06),
-                      blurRadius: 8.0,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  boxShadow: _isFocused
+                      ? [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.10),
+                            blurRadius: 8.0,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.02),
+                            blurRadius: 4.0,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
                 ),
-                clipBehavior: Clip.antiAlias,
                 child: TextField(
                   controller: _searchController,
+                  focusNode: _focusNode,
                   textAlignVertical: TextAlignVertical.center,
+                  style: AppTextStyles.body.copyWith(
+                    color: AppColors.text,
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  cursorColor: AppColors.primary,
                   onChanged: (val) {
                     ref.read(historySearchProvider.notifier).setQuery(val);
                   },
@@ -245,28 +280,38 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     isDense: true,
                     hintText: 'Search by ID, label or condition',
                     hintStyle: AppTextStyles.body.copyWith(
-                      color: AppColors.secondaryText,
+                      color: AppColors.secondaryText.withValues(alpha: 0.8),
                       fontSize: 14.0,
                     ),
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.search_rounded,
-                      color: AppColors.primary,
+                      color: _isFocused ? AppColors.primary : AppColors.secondaryText,
                       size: 20.0,
                     ),
                     suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear_rounded, size: 18.0),
-                            onPressed: () {
-                              _searchController.clear();
-                              ref.read(historySearchProvider.notifier).clear();
-                            },
+                        ? Padding(
+                            padding: const EdgeInsets.only(right: 4.0),
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.cancel_rounded,
+                                size: 18.0,
+                                color: AppColors.secondaryText,
+                              ),
+                              splashRadius: 18.0,
+                              tooltip: 'Clear search',
+                              onPressed: () {
+                                _searchController.clear();
+                                ref.read(historySearchProvider.notifier).clear();
+                              },
+                            ),
                           )
                         : null,
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.s16,
+                      horizontal: AppSpacing.s12,
+                      vertical: 0.0,
                     ),
                   ),
                 ),

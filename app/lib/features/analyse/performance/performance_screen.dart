@@ -205,6 +205,18 @@ class PerformanceScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              if (benchmarkState.isRunning) ...[
+                const SizedBox(height: AppSpacing.s8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadii.large),
+                  child: LinearProgressIndicator(
+                    value: benchmarkState.progress > 0 ? benchmarkState.progress : null,
+                    backgroundColor: AppColors.surfaceVariant,
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                    minHeight: 5.0,
+                  ),
+                ),
+              ],
               const SizedBox(height: AppSpacing.s20),
 
               // Side-by-side comparison cards
