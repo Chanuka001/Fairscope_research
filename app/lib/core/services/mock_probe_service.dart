@@ -22,11 +22,16 @@ class MockProbeService implements ProbeService {
   int _simulationCounter = 0;
 
   static const List<String> _sampleAssets = [
-    'assets/images/clinical/clinical_skin1.jpg',
-    'assets/images/clinical/clinical_skin2.jpg',
-    'assets/images/clinical/clinical_skin3.jpg',
-    'assets/images/clinical/clinical_skin4.jpg',
-    'assets/images/clinical/clinical_skin5.jpg',
+    'assets/images/clinical/clinical_acne1.jpg',
+    'assets/images/clinical/clinical_benign1.jpg',
+    'assets/images/clinical/clinical_eczema1.jpg',
+    'assets/images/clinical/clinical_melanoma1.jpg',
+    'assets/images/clinical/clinical_psoriasis1.jpg',
+    'assets/images/clinical/clinical_acne2.jpg',
+    'assets/images/clinical/clinical_benign2.jpg',
+    'assets/images/clinical/clinical_eczema2.jpg',
+    'assets/images/clinical/clinical_melanoma2.jpg',
+    'assets/images/clinical/clinical_psoriasis2.jpg',
   ];
 
   final Duration connectionDelay;
@@ -82,11 +87,45 @@ class MockProbeService implements ProbeService {
       imageBytes = Uint8List.fromList(img.encodeJpg(sample));
     }
 
-    // Generate realistic skin sensor telemetry
+    // Generate condition-calibrated skin sensor telemetry matching the 5 diagnostic classes
+    final mod = index % 5;
+    final double moisture;
+    final double temperature;
+    final int colorIndex;
+
+    switch (mod) {
+      case 0: // Acne
+        moisture = 37.5 + ((index * 1.3) % 4.0);
+        temperature = 32.4 + ((index * 0.2) % 0.8);
+        colorIndex = 2;
+        break;
+      case 1: // Benign Nevus
+        moisture = 43.0 + ((index * 1.1) % 5.0);
+        temperature = 32.7 + ((index * 0.1) % 0.5);
+        colorIndex = 3;
+        break;
+      case 2: // Eczema (dry skin / reduced hydration barrier)
+        moisture = 22.0 + ((index * 1.5) % 4.5);
+        temperature = 33.1 + ((index * 0.2) % 0.6);
+        colorIndex = 1;
+        break;
+      case 3: // Melanoma
+        moisture = 47.5 + ((index * 1.2) % 4.0);
+        temperature = 33.3 + ((index * 0.2) % 0.7);
+        colorIndex = 4;
+        break;
+      case 4: // Psoriasis (scaling / hyperkeratosis)
+      default:
+        moisture = 28.0 + ((index * 1.4) % 3.5);
+        temperature = 32.6 + ((index * 0.2) % 0.5);
+        colorIndex = 5;
+        break;
+    }
+
     final reading = SensorReading(
-      moisture: 38.0 + ((index * 5.2) % 24.0),
-      temperature: 32.4 + ((index * 0.3) % 2.1),
-      colorIndex: 1 + (index % 6),
+      moisture: double.parse(moisture.toStringAsFixed(1)),
+      temperature: double.parse(temperature.toStringAsFixed(1)),
+      colorIndex: colorIndex,
       timestamp: DateTime.now(),
     );
 
