@@ -163,7 +163,20 @@ class TfliteModelRunnerService implements ModelRunnerService {
         input = [inputTensor];
       }
     } else {
-      input = [inputTensor];
+      // If model expects float32, ensure double values
+      if (inputTensor is List && inputTensor.isNotEmpty && inputTensor[0][0][0] is int) {
+        input = [
+          inputTensor.map((row) {
+            return (row as List).map((pixel) {
+              return (pixel as List).map((ch) {
+                return ((ch as int) / 128.0).clamp(-1.0, 1.0);
+              }).toList();
+            }).toList();
+          }).toList()
+        ];
+      } else {
+        input = [inputTensor];
+      }
     }
 
     // Allocate output buffer according to output shape and type
@@ -205,27 +218,12 @@ class TfliteModelRunnerService implements ModelRunnerService {
       }
     }
 
-    // If model outputs > _labels.length (e.g. 1,000-class ImageNet stand-in),
-    // map deterministically to the 5 FairScope skin categories with a realistic diagnostic confidence.
-    final String label;
-    final double confidence;
+    final String label = (maxIdx < _labels.length) ? _labels[maxIdx] : _labels[maxIdx % _labels.length];
+    final double confidence = rawMaxConfidence;
     final classMap = <String, double>{};
 
-    if (maxIdx >= _labels.length || rawMaxConfidence < 0.20) {
-      final targetIdx = maxIdx % _labels.length;
-      label = _labels[targetIdx];
-      // Realistic diagnostic confidence between 84.5% and 91.8%
-      confidence = 0.845 + ((maxIdx % 73) / 1000.0);
-      final remaining = (1.0 - confidence) / (_labels.length - 1);
-      for (int i = 0; i < _labels.length; i++) {
-        classMap[_labels[i]] = (i == targetIdx) ? confidence : remaining;
-      }
-    } else {
-      label = _labels[maxIdx];
-      confidence = rawMaxConfidence;
-      for (int i = 0; i < _labels.length && i < probabilities.length; i++) {
-        classMap[_labels[i]] = probabilities[i];
-      }
+    for (int i = 0; i < _labels.length; i++) {
+      classMap[_labels[i]] = (i < probabilities.length) ? probabilities[i] : 0.0;
     }
 
     return Prediction(

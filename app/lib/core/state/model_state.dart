@@ -89,8 +89,8 @@ class AnalysisNotifier extends Notifier<AnalysisState> {
       developer.log('Preprocessing image for inference...', name: 'AnalysisNotifier');
       final inputTensor = await preprocessor.preprocess(
         capture.imageBytes,
-        options: PreprocessOptions(
-          isQuantized: activeVariant == 'quantized_int8',
+        options: const PreprocessOptions(
+          isQuantized: false, // Both FP32 and INT8 deployment models take normalized float32 inputs in [-1.0, 1.0]
         ),
       );
       final preprocessMs = preprocessor.lastPreprocessDurationMs;
