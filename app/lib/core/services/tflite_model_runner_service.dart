@@ -46,11 +46,11 @@ class TfliteModelRunnerService implements ModelRunnerService {
     } catch (e) {
       developer.log('⚠️ Failed to load labels from ${ModelConfig.labelsPath}: $e', name: 'ModelRunner');
       _labels = [
-        'Normal (Healthy skin)',
-        'Mild Erythema',
-        'Hyperpigmentation',
-        'Dryness / Flaking',
-        'Active Acne Lesion',
+        'Acne',
+        'Benign Nevus',
+        'Eczema',
+        'Melanoma',
+        'Psoriasis',
       ];
     }
   }

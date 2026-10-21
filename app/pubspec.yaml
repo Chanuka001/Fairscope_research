@@ -66,6 +66,7 @@ flutter:
     - assets/icons/
     - assets/images/
     - assets/images/avatas/
+    - assets/images/clinical/
     - assets/models/
     - assets/test_images/
     - assets/sample_results/

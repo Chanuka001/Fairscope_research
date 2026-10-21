@@ -22,12 +22,11 @@ class MockProbeService implements ProbeService {
   int _simulationCounter = 0;
 
   static const List<String> _sampleAssets = [
-    'assets/images/avatas/user_avatar_type_I.png',
-    'assets/images/avatas/user_avatar_type_II.png',
-    'assets/images/avatas/user_avatar_type_III.png',
-    'assets/images/avatas/user_avatar_type_IV.png',
-    'assets/images/avatas/user_avatar_type_V.png',
-    'assets/images/avatas/user_avatar_type_VI.png',
+    'assets/images/clinical/clinical_skin1.jpg',
+    'assets/images/clinical/clinical_skin2.jpg',
+    'assets/images/clinical/clinical_skin3.jpg',
+    'assets/images/clinical/clinical_skin4.jpg',
+    'assets/images/clinical/clinical_skin5.jpg',
   ];
 
   final Duration connectionDelay;

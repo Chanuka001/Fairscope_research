@@ -1,6 +1,5 @@
-Normal (Healthy skin)
-Mild Erythema
-Hyperpigmentation
-Dryness / Flaking
-Active Acne Lesion
-
+Acne
+Benign Nevus
+Eczema
+Melanoma
+Psoriasis
