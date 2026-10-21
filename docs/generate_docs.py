@@ -274,7 +274,7 @@ def build_document():
     quant_widths = [1.8, 1.5, 1.5, 1.7]
     quant_headers = ["Metric / Attribute", "Baseline Model (FP32)", "Compressed Model (INT8)", "Optimization Gain"]
     quant_data = [
-        ["Model Asset Size", "13.91 MB", "3.80 MB", "72.7% Storage Reduction (3.66×)"],
+        ["Model Asset Size", "8.48 MB", "2.59 MB", "69.5% Storage Reduction (3.27×)"],
         ["Weight Representation", "32-bit IEEE Float", "8-bit Signed Integer (int8)", "4× Memory Footprint Reduction"],
         ["Arithmetic Operations", "Floating-Point ALUs", "Integer SIMD Arithmetic", "Up to 4× Lower Energy Consumption"],
         ["Target Cache Level", "Spills into System DRAM", "Fits in CPU L2/L3 Cache", "Zero DRAM Stall Latency Spikes"]
@@ -471,6 +471,53 @@ def build_document():
         "Stable. The workflow executes flutter analyze (enforcing 0 warnings/lint errors) and flutter test. Successful builds "
         "generate downloadable diagnostic logs and coverage artifacts."
     )
+
+    
+    # -------------------------------------------------------------
+    # 8.3 PROTOTYPE EVALUATION & STAKEHOLDER FEEDBACK
+    # -------------------------------------------------------------
+    h2 = doc.add_heading("8.3 Prototype Evaluation & Stakeholder Feedback", level=2)
+    h2.paragraph_format.space_before = Pt(12)
+    h2.paragraph_format.space_after = Pt(4)
+    for r in h2.runs:
+        r.font.name = "Arial"
+        r.font.color.rgb = RGBColor(0x0F, 0x17, 0x2A)
+
+    doc.add_paragraph(
+        "To iteratively evaluate the FairScope edge prototype prior to the 50% milestone, structured feedback was "
+        "synthesized across two key evaluation dimensions: Technical & Architectural Requirements (system review) "
+        "and Clinician & End-User Usability (clinical field review)."
+    )
+
+    doc.add_paragraph("Table 8.2: Technical & Architectural Prototype Feedback (System Review):")
+
+    tech_fb_widths = [2.2, 1.2, 3.1]
+    tech_fb_headers = ["Feedback / System Requirement", "Status", "Address & Technical Implementation"]
+    tech_fb_data = [
+        ["Runs on the phone, no cloud", "Done", "Runs 100% offline via native on-device TFLite runtime for patient data privacy."],
+        ["Real-time response", "In progress", "Background image isolates active (<=35ms); NPU/GPU hardware acceleration underway."],
+        ["Original vs compressed comparison", "Done", "In-app benchmark and parity notebook prove 69.5% size cut with 100% prediction match."],
+        ["Works with the team's components", "In progress", "Member A's model deployed; probe networking interface prepared for Member D's hardware."],
+        ["Battery & thermal efficiency", "Done", "Single-batch processing and cooperative CPU yielding prevent device heating and battery drain."]
+    ]
+    create_and_format_table(doc, tech_fb_widths, tech_fb_headers, tech_fb_data, header_bg="1E3A8A")
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(6)
+
+    doc.add_paragraph("Table 8.3: Clinician & End-User Usability Feedback (Clinical Prototype Review):")
+
+    user_fb_widths = [2.5, 1.2, 2.8]
+    user_fb_headers = ["User / Clinician Feedback", "Status", "Address & Implementation Action"]
+    user_fb_data = [
+        ["\"Patient photos shouldn't leave the device\"", "Done", "100% offline inference using local TFLite; zero cloud storage ensures medical privacy."],
+        ["\"UI stutters during image analysis\"", "Done", "Offloaded heavy image resizing and normalization to background Dart worker threads."],
+        ["\"Need confidence that compression doesn't harm accuracy\"", "Done", "Added in-app Benchmark tab showing 100% prediction parity between FP32 and INT8 models."],
+        ["\"Hard to interpret single diagnosis labels\"", "Done", "Added full 5-class probability breakdown and sensor telemetry for clinical transparency."],
+        ["\"Connecting to the hardware probe should be seamless\"", "In progress", "Mock service fully functional; Wi-Fi/HTTP handshake for the ESP32 probe currently being finalized."]
+    ]
+    create_and_format_table(doc, user_fb_widths, user_fb_headers, user_fb_data, header_bg="0284C7")
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(8)
 
     # -------------------------------------------------------------
     # 9. REMAINING 50% ROADMAP & HANDOFF PROTOCOL

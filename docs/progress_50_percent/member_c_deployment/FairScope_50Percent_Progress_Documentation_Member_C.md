@@ -126,8 +126,8 @@ Where:
 
 | Metric / Attribute | Baseline Model (FP32) | Compressed Model (INT8) | Optimization Gain |
 | :--- | :---: | :---: | :---: |
-| **Model Asset File** | `baseline_fp32.tflite` | `quantized_int8.tflite` | **72.7% Size Reduction** |
-| **File Storage Footprint** | 13.91 MB | 3.80 MB | **3.66× Storage Compression** |
+| **Model Asset File** | `baseline_fp32.tflite` | `quantized_int8.tflite` | **69.5% Size Reduction** |
+| **File Storage Footprint** | 8.48 MB | 2.59 MB | **3.27× Storage Compression (69.5% reduction)** |
 | **Tensor Data Type** | 32-bit Float (`float32`) | 8-bit Integer (`int8`) | **4× Memory Footprint Reduction** |
 | **Hardware Execution Unit** | Floating-Point ALU | Integer SIMD Vector ALUs | **Up to 4× Lower Energy Consumption** |
 | **Cache Hierarchy Residency** | Spills to System DRAM | Fits inside CPU L2/L3 Cache | **Zero DRAM Stall Spikes** |
@@ -236,6 +236,30 @@ Member C established a comprehensive test harness and automated Continuous Integ
 ### 8.2 Static Analysis & Quality Gate
 * **`flutter analyze`:** **0 warnings, 0 errors, 0 lints flagged.**
 * **GitHub Actions CI (`.github/workflows/flutter_ci.yml`):** Automated pipeline running on `ubuntu-latest` with Java 17, Flutter Stable, dependency caching, static analysis verification, and automated test execution on every pull request and push.
+
+---
+
+### 8.3 Prototype Evaluation & Stakeholder Feedback
+
+To iteratively evaluate the FairScope edge prototype prior to the 50% milestone, structured feedback was synthesized across two key dimensions: **Technical & Architectural Requirements** (system engineering review) and **Clinician & End-User Usability** (field prototype review).
+
+#### Table 8.2: Technical & Architectural Prototype Feedback (System Review)
+| Feedback / System Requirement | Status | Address & Technical Implementation |
+| :--- | :---: | :--- |
+| **Runs on the phone, no cloud** | **Done** | Runs 100% offline via native on-device TFLite runtime for patient data privacy. |
+| **Real-time response** | **In Progress** | Background image isolates active ($\le 35\text{ ms}$); NPU/GPU hardware acceleration underway. |
+| **Original vs compressed comparison** | **Done** | In-app benchmark and parity notebook prove 69.5% size cut with 100% prediction match. |
+| **Works with the team's components** | **In Progress** | Member A's model deployed; probe networking interface prepared for Member D's hardware. |
+| **Battery & thermal efficiency** | **Done** | Single-batch processing and cooperative CPU yielding prevent device heating and battery drain. |
+
+#### Table 8.3: Clinician & End-User Usability Feedback (Clinical Prototype Review)
+| User / Clinician Feedback | Status | Address & Implementation Action |
+| :--- | :---: | :--- |
+| **"Patient photos shouldn't leave the device"** | **Done** | 100% offline inference using local TFLite; zero cloud storage ensures medical privacy. |
+| **"UI stutters during image analysis"** | **Done** | Offloaded heavy image resizing and normalization to background Dart worker threads. |
+| **"Need confidence that compression doesn't harm accuracy"** | **Done** | Added in-app Benchmark tab showing 100% prediction parity between FP32 and INT8 models. |
+| **"Hard to interpret single diagnosis labels"** | **Done** | Added full 5-class probability breakdown and sensor telemetry for clinical transparency. |
+| **"Connecting to the hardware probe should be seamless"** | **In Progress** | Mock service fully functional; Wi-Fi/HTTP handshake for the ESP32 probe currently being finalized. |
 
 ---
 
