@@ -236,6 +236,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
                 height: 48.0,
+                clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
                   color: _isFocused
                       ? AppColors.surface
@@ -278,6 +279,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   },
                   decoration: InputDecoration(
                     isDense: true,
+                    filled: false,
+                    fillColor: Colors.transparent,
                     hintText: 'Search by ID, label or condition',
                     hintStyle: AppTextStyles.body.copyWith(
                       color: AppColors.secondaryText.withValues(alpha: 0.8),
