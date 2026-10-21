@@ -425,9 +425,12 @@ def build_document():
 
     doc.add_paragraph(
         "• Tab 2: History (Offline Clinical Vault):\n"
-        "  - Stores only analysed clinical records with auto-generated identifiers (e.g., FS-0001) and optional anonymous clinical notes.\n"
-        "  - Strict privacy protection: Zero cloud transmission. All JSON metadata and JPEG captures persist exclusively in private application sandbox storage.\n"
-        "  - Includes search-by-ID, filtering, record inspection, and irreversible deletion."
+        "  - Strict Zero-Cloud Privacy Protection: Patient biometric imagery, 5-class predictions, and sensor telemetry persist exclusively in the Android private app sandbox storage.\n"
+        "  - Physical Storage Location on Phone: /data/user/0/com.fairscope.app/app_flutter/fairscope_history/ (managed via FileHistoryRepository & getApplicationDocumentsDirectory()).\n"
+        "  - File Storage Schema: Discrete JSON records (FS-0001.json, FS-0002.json, ...) saving base64 lesion image data, 5-class probability vector, hydration/temperature telemetry, and model variant.\n"
+        "  - Live Capture Buffer: Uncommitted captures are buffered temporarily in a 5-card FIFO RAM queue (CaptureStore) and only written to disk when committed by the clinician.\n"
+        "  - Anonymization & Medical Sovereignty: Auto-generated scan IDs (FS-XXXX) with explicit clinical notices against entering real patient names, adhering to HIPAA data privacy standards.\n"
+        "  - Vault Management: Real-time search by ID/condition, complete diagnostic re-inspection, and permanent deletion with zero residual fragments."
     )
 
     doc.add_paragraph(

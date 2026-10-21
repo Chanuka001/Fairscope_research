@@ -212,8 +212,11 @@ The application is structured into three primary navigation tabs:
 
 ### 2. History Tab (Offline Clinical Vault)
 * **Zero-Cloud Local Persistence:** Encrypted JSON metadata and JPEG captures are stored exclusively in the app's sandboxed local directory (`path_provider`).
-* **Anonymization & Compliance:** Automatic scan ID generation (`FS-0001`) with an explicit clinical notice: *"Do not enter real patient names"*.
-* **Vault Operations:** Real-time search filtering by scan ID or clinical label, full record re-inspection (re-opening Steps 2 and 3), and permanent hard-deletion.
+  - **Physical Location on Phone:** `/data/user/0/com.fairscope.app/app_flutter/fairscope_history/` (Android internal private app sandbox accessed via Flutter's `getApplicationDocumentsDirectory()`).
+  - **File Structure & Schema:** Discrete JSON files per scan (`FS-0001.json`, `FS-0002.json`, ...) encapsulating base64 lesion image data, 5-class diagnostic probability distribution, physical sensor readings (hydration %, surface temperature in °C, phototype), and model variant used (`baseline_fp32` vs `quantized_int8`).
+  - **In-Memory Capture Buffer:** Uncommitted live probe captures reside temporarily in a 5-card FIFO RAM queue (`CaptureStore`), only persisting to disk when explicitly committed to the vault by the clinician.
+* **Anonymization & Medical Data Sovereignty:** Automatic scan ID generation (`FS-XXXX`) with an explicit clinical notice: *"Do not enter real patient names"*. Biometric photos and skin readings never leave the physical handset or traverse external cloud APIs, ensuring strict HIPAA and medical privacy compliance.
+* **Vault Operations:** Real-time search filtering by scan ID or clinical label, full record re-inspection (re-opening Steps 2 and 3), and permanent hard-deletion with no lingering cached copies.
 
 ### 3. Benchmark Tab (Edge AI Research Dashboard)
 * Empirical side-by-side performance comparison between FP32 and INT8 models.
