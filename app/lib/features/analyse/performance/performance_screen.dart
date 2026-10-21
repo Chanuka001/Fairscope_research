@@ -171,7 +171,7 @@ class PerformanceScreen extends ConsumerWidget {
                     : () async {
                         final res = await ref
                             .read(benchmarkStateProvider.notifier)
-                            .executeBenchmark(runs: 50, warmupRuns: 10);
+                            .executeBenchmark(runs: 25, warmupRuns: 5);
                         if (res != null && context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -208,7 +208,7 @@ class PerformanceScreen extends ConsumerWidget {
                       const Icon(Icons.play_arrow_rounded, size: 20.0),
                       const SizedBox(width: AppSpacing.s8),
                       Text(
-                        result == null ? 'Run benchmark' : 'Re-run benchmark (50 runs)',
+                        result == null ? 'Run benchmark' : 'Re-run benchmark (25 runs)',
                         style: AppTextStyles.label.copyWith(
                           fontWeight: FontWeight.w700,
                           fontSize: 15.0,

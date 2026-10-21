@@ -65,8 +65,8 @@ class BenchmarkNotifier extends Notifier<BenchmarkState> {
   }
 
   Future<BenchmarkResult?> executeBenchmark({
-    int runs = 50,
-    int warmupRuns = 10,
+    int runs = 25,
+    int warmupRuns = 5,
   }) async {
     final service = ref.read(benchmarkServiceProvider);
     state = state.copyWith(isRunning: true, progress: 0.0, error: null);

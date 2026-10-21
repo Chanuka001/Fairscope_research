@@ -40,8 +40,8 @@ class TfliteBenchmarkService implements BenchmarkService {
 
   @override
   Future<BenchmarkResult> runBenchmark({
-    int runs = 50,
-    int warmupRuns = 10,
+    int runs = 25,
+    int warmupRuns = 5,
   }) async {
     if (_isRunning) {
       throw StateError('A benchmark is already running.');

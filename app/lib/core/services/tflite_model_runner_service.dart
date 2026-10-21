@@ -75,7 +75,8 @@ class TfliteModelRunnerService implements ModelRunnerService {
     developer.log('Loading TFLite model [$variant] from $assetPath...', name: 'ModelRunner');
 
     try {
-      final options = InterpreterOptions()..threads = 4;
+      // 2 threads optimal for mobile: leaves CPU cores free for Flutter UI & 60fps rendering
+      final options = InterpreterOptions()..threads = 2;
       _interpreter = await Interpreter.fromAsset(assetPath, options: options);
       _currentVariant = variant;
 
@@ -285,8 +286,8 @@ class TfliteModelRunnerService implements ModelRunnerService {
     // 1. Warm-up runs (not counted in benchmark stats)
     for (int w = 0; w < warmupIterations; w++) {
       _interpreter!.run(input, outputBuffer);
-      // Yield to message loop between warm-ups so UI stays responsive
-      await Future<void>.delayed(Duration.zero);
+      // Yield 10ms to message loop between warm-ups so UI stays fully responsive
+      await Future<void>.delayed(const Duration(milliseconds: 10));
     }
 
     // 2. Timed benchmark runs (timing ONLY interpreter call for scientific integrity)
@@ -299,8 +300,8 @@ class TfliteModelRunnerService implements ModelRunnerService {
 
       onProgress?.call(i + 1, iterations);
 
-      // Yield 3ms to the UI event loop to allow Flutter to render frames at 60/120 FPS smoothly
-      await Future<void>.delayed(const Duration(milliseconds: 3));
+      // Yield 16ms (full 60 FPS display frame window) so UI animations and touch stay butter-smooth
+      await Future<void>.delayed(const Duration(milliseconds: 16));
     }
 
     return latencies;

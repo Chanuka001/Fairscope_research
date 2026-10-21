@@ -19,8 +19,8 @@ abstract class BenchmarkService {
 
   /// Runs the full benchmark protocol across both model variants.
   Future<BenchmarkResult> runBenchmark({
-    int runs = 50,
-    int warmupRuns = 10,
+    int runs = 25,
+    int warmupRuns = 5,
   });
 
   /// Releases resources.
