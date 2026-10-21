@@ -52,6 +52,7 @@ checkpoints/
 *.h5
 *.keras
 *.onnx
+!models/image_branch/model.onnx
 
 # Research Datasets (Never commit raw dataset images/labels)
 data/*
@@ -82,3 +83,6 @@ dashboard/yarn-error.log*
 
 # Logs & Benchmarks temporary outputs
 *.log
+
+# Agents
+.agents

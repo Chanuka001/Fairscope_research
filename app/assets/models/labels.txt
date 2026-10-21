@@ -1,0 +1,5 @@
+Acne
+Benign Nevus
+Eczema
+Melanoma
+Psoriasis
