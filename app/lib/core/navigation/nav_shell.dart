@@ -29,8 +29,8 @@ class _NavShellState extends ConsumerState<NavShell> {
     final isForward = currentStep >= _lastStep;
     _lastStep = currentStep;
 
-    // Bottom navigation is hidden inside Analyse steps 2 to 4
-    final showBottomNav = currentTab == 1 || (currentTab == 0 && currentStep == 1);
+    // Bottom navigation is visible on History, Benchmark, and Step 1 of Analyse
+    final showBottomNav = currentTab == 1 || currentTab == 2 || (currentTab == 0 && currentStep == 1);
 
     return PopScope(
       canPop: currentTab == 0 && currentStep == 1,
@@ -52,10 +52,15 @@ class _NavShellState extends ConsumerState<NavShell> {
                   key: const ValueKey('tab_analyse'),
                   child: _buildAnalyseFlow(currentStep, isForward),
                 )
-              : const KeyedSubtree(
-                  key: ValueKey('tab_history'),
-                  child: HistoryScreen(),
-                ),
+              : currentTab == 1
+                  ? const KeyedSubtree(
+                      key: ValueKey('tab_history'),
+                      child: HistoryScreen(),
+                    )
+                  : const KeyedSubtree(
+                      key: ValueKey('tab_benchmark'),
+                      child: PerformanceScreen(isStandaloneTab: true),
+                    ),
         ),
         bottomNavigationBar: showBottomNav
             ? Container(
@@ -80,6 +85,11 @@ class _NavShellState extends ConsumerState<NavShell> {
                       icon: Icon(Icons.history_outlined, color: AppColors.secondaryText),
                       selectedIcon: Icon(Icons.history_rounded, color: AppColors.primary),
                       label: 'History',
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.speed_outlined, color: AppColors.secondaryText),
+                      selectedIcon: Icon(Icons.speed_rounded, color: AppColors.primary),
+                      label: 'Benchmark',
                     ),
                   ],
                 ),

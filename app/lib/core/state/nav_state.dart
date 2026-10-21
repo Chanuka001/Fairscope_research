@@ -3,7 +3,7 @@ import 'history_state.dart';
 import 'model_state.dart';
 import 'probe_state.dart';
 
-/// Currently selected bottom navigation tab (0 = Analyse, 1 = History)
+/// Currently selected bottom navigation tab (0 = Analyse, 1 = History, 2 = Benchmark)
 class BottomNavNotifier extends Notifier<int> {
   @override
   int build() => 0;
@@ -16,7 +16,7 @@ class BottomNavNotifier extends Notifier<int> {
 final bottomNavIndexProvider =
     NotifierProvider<BottomNavNotifier, int>(BottomNavNotifier.new);
 
-/// Current active step in the 4-step Analyse flow (1, 2, 3, 4)
+/// Current active step in the 3-step Analyse flow (1, 2, 3)
 class AnalyseStepNotifier extends Notifier<int> {
   @override
   int build() => 1;
@@ -28,7 +28,7 @@ class AnalyseStepNotifier extends Notifier<int> {
   }
 
   void nextStep() {
-    if (state < 4) {
+    if (state < 3) {
       state = state + 1;
     }
   }
@@ -96,8 +96,8 @@ class NavigationController {
     final currentTab = _ref.read(bottomNavIndexProvider);
     final openedFromHistory = _ref.read(openedFromHistoryProvider);
 
-    if (currentTab == 1) {
-      // If on History tab, back returns to Analyse tab Step 1
+    if (currentTab == 1 || currentTab == 2) {
+      // If on History or Benchmark tab, back returns to Analyse tab Step 1
       _ref.read(analyseStepProvider.notifier).goToStep(1);
       _ref.read(bottomNavIndexProvider.notifier).setTab(0);
       return true;

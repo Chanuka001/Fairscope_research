@@ -159,13 +159,13 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
         title: Column(
           children: [
             Text('Result', style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w700)),
-            Text('Step 2 of 4', style: AppTextStyles.caption.copyWith(color: AppColors.secondaryText)),
+            Text('Step 2 of 3', style: AppTextStyles.caption.copyWith(color: AppColors.secondaryText)),
           ],
         ),
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: AppSpacing.s16),
-            child: StepIndicator(currentStep: 2),
+            child: StepIndicator(currentStep: 2, totalSteps: 3),
           ),
         ],
       ),

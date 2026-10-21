@@ -90,7 +90,7 @@ void main() {
 
     // 7. Verify Step 2 is displayed
     expect(find.text('Result'), findsOneWidget);
-    expect(find.text('Step 2 of 4'), findsOneWidget);
+    expect(find.text('Step 2 of 3'), findsOneWidget);
     // Verify bottom nav is now HIDDEN
     expect(find.byType(NavigationBar), findsNothing);
 
@@ -104,10 +104,10 @@ void main() {
 
     // 9. Verify Step 3 is displayed
     expect(find.text('Explanation'), findsOneWidget);
-    expect(find.text('Step 3 of 4'), findsOneWidget);
+    expect(find.text('Step 3 of 3'), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
 
-    // 10. Tap 'Model performance' to go to Step 4
+    // 10. Tap 'Model performance' to navigate to Benchmark Tab
     final performanceBtn = find.widgetWithText(OutlinedButton, 'Model performance');
     expect(performanceBtn, findsOneWidget);
     await tester.ensureVisible(performanceBtn);
@@ -115,32 +115,26 @@ void main() {
     await tester.tap(performanceBtn);
     await tester.pumpAndSettle();
 
-    // 11. Verify Step 4 is displayed
-    expect(find.text('Performance'), findsOneWidget);
-    expect(find.text('Step 4 of 4'), findsOneWidget);
-    expect(find.byType(NavigationBar), findsNothing);
+    // 11. Verify Benchmark Tab is displayed
+    expect(find.widgetWithText(AppBar, 'Benchmark'), findsOneWidget);
+    expect(find.byType(NavigationBar), findsOneWidget);
 
-    // 12. Tap back button to return to Step 3
-    final backBtn = find.byIcon(Icons.arrow_back_rounded);
-    await tester.tap(backBtn);
-    await tester.pumpAndSettle();
-    expect(find.text('Explanation'), findsOneWidget);
-
-    // 13. Tap back button to return to Step 2
-    await tester.tap(backBtn);
-    await tester.pumpAndSettle();
-    expect(find.text('Result'), findsOneWidget);
-
-    // 14. Tap back button to return to Step 1
-    await tester.tap(backBtn);
+    // 12. Switch to Analyse tab
+    await tester.tap(find.text('Analyse'));
     await tester.pumpAndSettle();
     expect(find.text('Pending Captures'), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
 
-    // 15. Switch to History Tab
+    // 13. Switch to History Tab
     await tester.tap(find.text('History'));
     await tester.pumpAndSettle();
     expect(find.text('Search by ID, label or condition'), findsOneWidget);
     expect(find.byType(TextField), findsOneWidget);
+
+    // 14. Switch to Benchmark Tab via bottom nav
+    await tester.tap(find.byIcon(Icons.speed_outlined));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(AppBar, 'Benchmark'), findsOneWidget);
+    expect(find.text('Run benchmark'), findsOneWidget);
   });
 }

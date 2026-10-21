@@ -10,9 +10,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
-/// Step 4: Performance Dashboard (Member C's Core Research Showcase)
+/// Performance Dashboard & Hardware Benchmark (Member C's Core Research Showcase)
 class PerformanceScreen extends ConsumerWidget {
-  const PerformanceScreen({super.key});
+  final bool isStandaloneTab;
+  const PerformanceScreen({super.key, this.isStandaloneTab = true});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,26 +26,39 @@ class PerformanceScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: AppColors.surface,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.text),
-          onPressed: () => navController.handleBack(),
-        ),
-        title: Column(
-          children: [
-            Text('Performance', style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w700)),
-            Text('Step 4 of 4', style: AppTextStyles.caption.copyWith(color: AppColors.secondaryText)),
-          ],
-        ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: AppSpacing.s16),
-            child: StepIndicator(currentStep: 4),
-          ),
-        ],
-      ),
+      appBar: isStandaloneTab
+          ? AppBar(
+              title: Text(
+                'Benchmark',
+                style: AppTextStyles.headline.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.text,
+                ),
+              ),
+              centerTitle: false,
+              elevation: 0,
+              backgroundColor: AppColors.background,
+            )
+          : AppBar(
+              elevation: 0,
+              backgroundColor: AppColors.surface,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_rounded, color: AppColors.text),
+                onPressed: () => navController.handleBack(),
+              ),
+              title: Column(
+                children: [
+                  Text('Performance', style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w700)),
+                  Text('Step 4 of 4', style: AppTextStyles.caption.copyWith(color: AppColors.secondaryText)),
+                ],
+              ),
+              actions: const [
+                Padding(
+                  padding: EdgeInsets.only(right: AppSpacing.s16),
+                  child: StepIndicator(currentStep: 4),
+                ),
+              ],
+            ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(

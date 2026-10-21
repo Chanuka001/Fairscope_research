@@ -75,13 +75,13 @@ class _ExplainScreenState extends ConsumerState<ExplainScreen> {
         title: Column(
           children: [
             Text('Explanation', style: AppTextStyles.title.copyWith(fontWeight: FontWeight.w700)),
-            Text('Step 3 of 4', style: AppTextStyles.caption.copyWith(color: AppColors.secondaryText)),
+            Text('Step 3 of 3', style: AppTextStyles.caption.copyWith(color: AppColors.secondaryText)),
           ],
         ),
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: AppSpacing.s16),
-            child: StepIndicator(currentStep: 3),
+            child: StepIndicator(currentStep: 3, totalSteps: 3),
           ),
         ],
       ),
@@ -499,31 +499,65 @@ class _ExplainScreenState extends ConsumerState<ExplainScreen> {
           AppSpacing.screenPadding,
           AppSpacing.s16,
         ),
-        child: OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size.fromHeight(48.0),
-            side: const BorderSide(color: AppColors.primary, width: 1.5),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppRadii.medium),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FilledButton(
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(48.0),
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadii.medium),
+                ),
+                elevation: 0,
+              ),
+              onPressed: () {
+                navController.setTab(0);
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.check_circle_outline_rounded, size: 20.0),
+                  const SizedBox(width: AppSpacing.s8),
+                  Text(
+                    'Done / New Scan',
+                    style: AppTextStyles.label.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.onPrimary,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          onPressed: () {
-            navController.goToStep(4);
-          },
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.bar_chart_rounded, size: 20.0, color: AppColors.primary),
-              const SizedBox(width: AppSpacing.s8),
-              Text(
-                'Model performance',
-                style: AppTextStyles.label.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primary,
+            const SizedBox(height: AppSpacing.s8),
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(44.0),
+                side: const BorderSide(color: AppColors.primary, width: 1.2),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadii.medium),
                 ),
               ),
-            ],
-          ),
+              onPressed: () {
+                navController.setTab(2);
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.speed_rounded, size: 18.0, color: AppColors.primary),
+                  const SizedBox(width: AppSpacing.s8),
+                  Text(
+                    'Model performance',
+                    style: AppTextStyles.label.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     ],
