@@ -52,6 +52,7 @@ checkpoints/
 *.h5
 *.keras
 *.onnx
+!models/image_branch/model.onnx
 
 # Research Datasets (Never commit raw dataset images/labels)
 data/*
